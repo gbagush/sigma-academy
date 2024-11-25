@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { verifyTokenFromRequest } from "@/lib/jwt";
 import { MongoError, ObjectId } from "mongodb";
 import { validateUsername } from "@/lib/utils";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const verificationResult = await verifyTokenFromRequest(request);
 
   if (verificationResult instanceof NextResponse) {
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   const verificationResult = await verifyTokenFromRequest(request);
 
   if (verificationResult instanceof NextResponse) {

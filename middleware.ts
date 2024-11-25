@@ -1,30 +1,36 @@
-import { NextResponse, userAgent } from "next/server";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-// import { verifyTokenFromRequest } from "./lib/jwt";
+import { jwtDecode } from "jwt-decode";
+import { JWTPayload } from "./lib/jwt";
 
 export function middleware(request: NextRequest) {
-  console.log("middleware running!");
-
   const userNavigatingRoute = request.nextUrl.pathname;
+  const token = request.cookies.get("session_token");
 
-  // const session = verifyTokenFromRequest(request);
+  let session: JWTPayload | null = null;
+  if (token && token.value) {
+    session = jwtDecode<JWTPayload>(token.value);
+  }
 
-  // console.log(session);
+  if (session) {
+    if (userNavigatingRoute.match(/^\/auth\/[^/]+\/(login|signup)$/)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
 
-  // if (session && session.decoded) {
-  //   if (
-  //     userNavigatingRoute.startsWith("/admin") &&
-  //     session.decoded.role !== "admin"
-  //   ) {
-  //     return NextResponse.redirect(new URL("/not-found", request.url));
-  //   }
-  // }
+    if (userNavigatingRoute.startsWith("/admin") && session.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  } else {
+    if (userNavigatingRoute.startsWith("/auth/")) {
+      return NextResponse.next();
+    }
 
-  console.log(userNavigatingRoute);
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: ["/admin/:path*", "/auth/:role*"],
 };

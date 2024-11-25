@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { matchPassword } from "@/lib/password";
 import { generateToken } from "@/lib/jwt";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   if (!data.email || !data.password) {

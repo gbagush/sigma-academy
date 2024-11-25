@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "@/lib/password";
 import { MongoError } from "mongodb";
 import { sendEmail } from "@/lib/mailer";
 import { emailConfirm } from "@/lib/mail-templates/email-confirm";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   if (!data.firstName || !data.lastName || !data.email || !data.password) {

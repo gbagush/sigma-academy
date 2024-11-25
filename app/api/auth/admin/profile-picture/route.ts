@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { verifyTokenFromRequest } from "@/lib/jwt";
 import { ObjectId } from "mongodb";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const verificationResult = await verifyTokenFromRequest(request);
 
   if (verificationResult instanceof NextResponse) {

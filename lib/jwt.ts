@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SECRET_KEY = process.env.JWT_SECRET as string;
 
-export interface Decoded {
+export interface JWTPayload {
   userId: string;
   email: string;
   role: string;
@@ -19,11 +19,11 @@ export function generateToken(
 }
 
 export function verifyToken(token: string): {
-  decoded: Decoded | null;
+  decoded: JWTPayload | null;
   expired: boolean;
 } {
   try {
-    const decoded = jwt.verify(token, SECRET_KEY) as Decoded;
+    const decoded = jwt.verify(token, SECRET_KEY) as JWTPayload;
     return { decoded, expired: false };
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -36,7 +36,7 @@ export function verifyToken(token: string): {
 
 export async function verifyTokenFromRequest(
   request: NextRequest
-): Promise<{ decoded: Decoded } | NextResponse> {
+): Promise<{ decoded: JWTPayload } | NextResponse> {
   const token = request.cookies.get("session_token");
 
   if (!token) {

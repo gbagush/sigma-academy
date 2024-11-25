@@ -2,10 +2,10 @@ import { db } from "@/lib/db";
 import { emailConfirm } from "@/lib/mail-templates/email-confirm";
 import { sendEmail } from "@/lib/mailer";
 import { ObjectId } from "mongodb";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { generateToken } from "@/lib/jwt";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const token = url.searchParams.get("token");
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
   );
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   if (!data.email) {
