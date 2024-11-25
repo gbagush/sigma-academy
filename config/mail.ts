@@ -9,6 +9,6 @@ export const mailConfig = {
   tls: {
     ciphers: "SSLv3",
   },
-  logger: true,
-  debug: true,
+  logger: process.env.NODE_ENV !== "production",
+  debug: process.env.NODE_ENV !== "production",
 };

@@ -17,8 +17,8 @@ export default function RegisterSuccess() {
           <CardBody className="text-center">
             <p>
               Thank you for signing up! Please check your email inbox for a
-              verification link. If you don't see it, please check your spam or
-              junk folder.
+              verification link. If you don&apos;t see it, please check your
+              spam or junk folder.
             </p>
           </CardBody>
         </Card>

@@ -28,9 +28,11 @@ import {
   DropdownItem,
 } from "@nextui-org/dropdown";
 import { Skeleton } from "@nextui-org/skeleton";
+import { Avatar } from "@nextui-org/avatar";
+import { charLimit, wordLimit } from "@/lib/utils";
 
 export const Navbar = () => {
-  const { user, status, logout } = useAuth();
+  const { user, role, status, logout } = useAuth();
 
   const searchInput = (
     <Input
@@ -98,17 +100,38 @@ export const Navbar = () => {
           ) : status === "login" && user ? (
             <Dropdown placement="bottom-start">
               <DropdownTrigger>
-                <User
-                  name={`${user.firstName} ${user.lastName}`}
-                  description={user.username ? user.username : user.email}
-                  avatarProps={{
-                    src: `https://api.dicebear.com/9.x/initials/svg?seed=${user.firstName}`,
-                  }}
+                <Avatar
+                  src={
+                    user.profilePicture
+                      ? user.profilePicture
+                      : `https://api.dicebear.com/9.x/initials/svg?seed=${user.firstName}`
+                  }
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="User Actions" className="p-3">
                 <DropdownSection aria-label="personal" showDivider>
-                  <DropdownItem key="settings">Profile</DropdownItem>
+                  <DropdownItem isReadOnly>
+                    <User
+                      name={wordLimit(`${user.firstName} ${user.lastName}`, 3)}
+                      description={
+                        user.username
+                          ? `@${user.username}`
+                          : charLimit(user.email, 15)
+                      }
+                      avatarProps={{
+                        src: user.profilePicture
+                          ? user.profilePicture
+                          : `https://api.dicebear.com/9.x/initials/svg?seed=${user.firstName}`,
+                      }}
+                    />
+                  </DropdownItem>
+                  <DropdownItem
+                    as={Link}
+                    key="settings"
+                    href={`/auth/${role}/profile`}
+                  >
+                    Profile
+                  </DropdownItem>
                   <DropdownItem key="courses">Courses</DropdownItem>
                 </DropdownSection>
 
