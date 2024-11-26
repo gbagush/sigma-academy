@@ -32,11 +32,14 @@ export default function UserLogin() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`/api/auth/user/login`, loginData);
+      const response = await axios.post(
+        `/api/auth/instructor/login`,
+        loginData
+      );
       const { token } = response.data;
 
       setToken(token);
-      setRole("user");
+      setRole("instructor");
 
       toast({ title: "Login successful!", description: "Welcome back!" });
 
@@ -72,7 +75,7 @@ export default function UserLogin() {
         <h1 className="font-bold text-2xl">Log In</h1>
       </div>
       <div>
-        <h1 className="text-lg">User </h1>
+        <h1 className="text-lg">Instructor</h1>
       </div>
 
       <form className="mt-4 max-w-xs w-full" onSubmit={handleSubmit}>
@@ -126,12 +129,8 @@ export default function UserLogin() {
       </form>
       <Divider className="mt-4 max-w-xs" />
       <div className="max-w-xs w-full mt-4">
-        <Button
-          as={Link}
-          href="/auth/instructor/login"
-          className="w-full mt -4"
-        >
-          Log In as Instructor
+        <Button as={Link} href="/auth/user/login" className="w-full mt -4">
+          Log In as User
         </Button>
       </div>
     </div>

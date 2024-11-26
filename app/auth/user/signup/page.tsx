@@ -8,6 +8,7 @@ import { Logo } from "@/components/icons";
 import { Eye, EyeClosed } from "lucide-react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@nextui-org/checkbox";
 
 export default function UserRegister() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +20,8 @@ export default function UserRegister() {
     password: "",
     confirmPassword: "",
   });
+  const [isChecked, setIsChecked] = useState(false);
+
   const { toast } = useToast();
 
   const togglePasswordVisibility = () => {
@@ -29,6 +32,10 @@ export default function UserRegister() {
     setShowConfirmPassword((prev) => !prev);
   };
 
+  const handleCheckboxChange = (checked: boolean) => {
+    setIsChecked(checked);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterData((prev) => ({ ...prev, [name]: value }));
@@ -36,6 +43,15 @@ export default function UserRegister() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!isChecked) {
+      toast({
+        title: "Sign Up failed",
+        description:
+          "Please accept the Terms and Conditions and Privacy Policy.",
+      });
+      return;
+    }
 
     if (registerData.password !== registerData.confirmPassword) {
       toast({
@@ -77,7 +93,7 @@ export default function UserRegister() {
   };
 
   return (
-    <div className="w-full flex flex-col min-h-full items-center justify-center pad-x">
+    <div className="w-full flex flex-col min-h-full items-center justify-center pad-x py-8">
       <div className="flex">
         <Logo />
         <p className="font-bold ml-2">Sigma</p>
@@ -161,6 +177,23 @@ export default function UserRegister() {
           onChange={handleInputChange}
         />
 
+        <Checkbox
+          size="sm"
+          className="mt-2"
+          isSelected={isChecked}
+          onValueChange={handleCheckboxChange}
+          required
+        >
+          By checking this box, I agree to the{" "}
+          <Link href="/terms-conditions" target="_blank" className="underline">
+            Terms and Conditions
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy-policy" target="_blank" className="underline">
+            Privacy Policy
+          </Link>
+        </Checkbox>
+
         <Button type="submit" className="w-full mt-4">
           Sign Up
         </Button>
@@ -175,7 +208,13 @@ export default function UserRegister() {
       </form>
       <Divider className="mt-4 max-w-xs" />
       <div className="max-w-xs w-full">
-        <Button className="w-full mt-4">Sign Up as Instructor</Button>
+        <Button
+          as={Link}
+          href="/auth/instructor/signup"
+          className="w-full mt-4"
+        >
+          Sign Up as Instructor
+        </Button>
       </div>
     </div>
   );

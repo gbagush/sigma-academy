@@ -8,7 +8,7 @@ import { Divider } from "@nextui-org/divider";
 import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ResetPassword() {
+export default function InstructorSignup() {
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
@@ -20,7 +20,7 @@ export default function ResetPassword() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`/api/auth/user/change-password`, {
+      const response = await axios.post(`/api/auth/instructor/signup`, {
         email,
       });
       toast({
@@ -34,6 +34,7 @@ export default function ResetPassword() {
       }, 2000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        console.log(error.response?.data);
         toast({
           title: "Request failed",
           description: error.response?.data.message || "An error occurred.",
@@ -54,7 +55,10 @@ export default function ResetPassword() {
         <p className="font-bold ml-2">Sigma</p>
       </div>
       <div className="mt-8">
-        <h1 className="font-bold text-2xl">Reset Password</h1>
+        <h1 className="font-bold text-2xl">Sign Up</h1>
+      </div>
+      <div>
+        <h1 className="mt-2">Instructor</h1>
       </div>
 
       <form className="mt-4 max-w-xs w-full" onSubmit={handleSubmit}>
@@ -68,15 +72,21 @@ export default function ResetPassword() {
           onChange={handleInputChange}
         />
         <Button type="submit" className="w-full mt-4">
-          Send Reset Link
+          Send Sign Up Link
         </Button>
         <div className="flex w-full justify-center mt-2">
           <span className="text-sm">
-            Remember your password?{" "}
+            Already have an account yet?{" "}
             <Link href="login" className="underline">
               Log In here
             </Link>
           </span>
+        </div>
+        <Divider className="mt-4 max-w-xs" />
+        <div className="max-w-xs w-full">
+          <Button as={Link} href="/auth/user/signup" className="w-full mt-4">
+            Sign Up as User
+          </Button>
         </div>
       </form>
     </div>

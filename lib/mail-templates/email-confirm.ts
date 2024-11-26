@@ -1,4 +1,4 @@
-interface MailData {
+interface ConfirmMail {
   name: String;
   intro: String;
   body: String;
@@ -8,7 +8,7 @@ interface MailData {
   outro: String;
 }
 
-export const emailConfirm = (mailData: MailData) => {
+export const emailConfirm = (mailData: ConfirmMail) => {
   return `
 <!doctype html>
 <html

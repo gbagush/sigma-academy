@@ -20,9 +20,12 @@ export default function ResetPassword() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`/api/auth/user/change-password`, {
-        email,
-      });
+      const response = await axios.post(
+        `/api/auth/instructor/change-password`,
+        {
+          email,
+        }
+      );
       toast({
         title: "Email Sent",
         description:

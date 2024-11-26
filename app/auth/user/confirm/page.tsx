@@ -83,10 +83,6 @@ export default function ConfirmEmail() {
           </span>
         </div>
       </form>
-      <Divider className="mt-4 max-w-xs" />
-      <div className="max-w-xs w-full">
-        <Button className="w-full mt-4">Log In as Instructor</Button>
-      </div>
     </div>
   );
 }
