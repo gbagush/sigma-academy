@@ -27,13 +27,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid password" }, { status: 401 });
   }
 
-  if (!user.verifiedAt) {
-    return NextResponse.json(
-      { message: "Email is not verified" },
-      { status: 403 }
-    );
-  }
-
   return NextResponse.json(
     {
       message: "Login successful",

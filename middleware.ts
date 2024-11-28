@@ -20,6 +20,13 @@ export function middleware(request: NextRequest) {
     if (userNavigatingRoute.startsWith("/admin") && session.role !== "admin") {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
+    if (
+      userNavigatingRoute.startsWith("/instructor") &&
+      session.role !== "instructor"
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   } else {
     if (userNavigatingRoute.startsWith("/auth/")) {
       return NextResponse.next();

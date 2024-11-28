@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/mailer";
 import { emailNotification } from "@/lib/mail-templates/email-notification";
 import { ObjectId } from "mongodb";
 import { hashPassword } from "@/lib/password";
+import { verifyTokenFromRequest } from "@/lib/jwt";
 
 export async function POST(
   request: NextRequest,
@@ -58,9 +59,12 @@ export async function POST(
   const hashedPassword = await hashPassword(data.password);
 
   await db.collection("applications").insertOne({
-    ...data,
+    firstName: data.firstName,
+    lastName: data.lastName,
     email: token.email,
     password: hashedPassword,
+    description: data.description,
+    socials: data.socials,
     status: "pending",
     createdAt: new Date(),
   });

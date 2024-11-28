@@ -22,7 +22,7 @@ import {
 } from "@nextui-org/modal";
 import Image from "next/image";
 
-export default function UserProfile() {
+export default function AdminProfile() {
   const { toast } = useToast();
   const { user, status, token } = useAuth();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -204,6 +204,7 @@ export default function UserProfile() {
                 src: user.profilePicture
                   ? user.profilePicture
                   : `https://api.dicebear.com/9.x/initials/svg?seed=${user.firstName}`,
+                radius: "sm",
               }}
               className="mt-8 justify-start"
               onClick={onOpen}

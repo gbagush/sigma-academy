@@ -21,7 +21,7 @@ export default function RegisterSuccess() {
               Thank you for making the application! Please check your email
               inbox for further instructions and a verification link. If you
               don&apos;t see our email, kindly check your spam or junk folder to
-              ensure you don&apos;t miss any important updates."
+              ensure you don&apos;t miss any important updates.
             </p>
           </CardBody>
         </Card>

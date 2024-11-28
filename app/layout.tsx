@@ -8,7 +8,6 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navigations/navbar";
-import { ArrowUp } from "lucide-react";
 import Footer from "@/components/navigations/footer";
 
 export const metadata: Metadata = {
@@ -44,13 +43,7 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-screen">
-            <Navbar />
-            <main className="container mx-auto max-w-7xl px-6 flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <main>{children}</main>
         </Providers>
       </body>
     </html>
