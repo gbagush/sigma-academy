@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
 
-export function SidebarBrand() {
+export function SidebarBrand({ subtitle }: { subtitle: string }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -22,8 +22,8 @@ export function SidebarBrand() {
             <Logo />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Sigma</span>
-            <span className="truncate text-xs">Academy</span>
+            <span className="truncate font-semibold">Sigma Academy</span>
+            <span className="truncate text-xs">{subtitle}</span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

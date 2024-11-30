@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await db.collection("users").findOne({ username });
+    const user = await db.collection("instructors").findOne({ username });
 
     if (user) {
       return NextResponse.json(

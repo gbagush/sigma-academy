@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { Eye, Filter } from "lucide-react";
 import {

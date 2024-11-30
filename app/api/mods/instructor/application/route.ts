@@ -143,7 +143,7 @@ export async function PUT(request: NextRequest) {
         $set: {
           status: "approved",
           modifiedDetails: {
-            admin: verificationResult.decoded.userId,
+            admin: new ObjectId(verificationResult.decoded.userId),
             modifiedAt: new Date(),
           },
         },
@@ -179,7 +179,7 @@ export async function PUT(request: NextRequest) {
       $set: {
         status: "rejected",
         modifiedDetails: {
-          admin: verificationResult.decoded.userId,
+          admin: new ObjectId(verificationResult.decoded.userId),
           reason: data.reason,
           modifiedAt: new Date(),
         },

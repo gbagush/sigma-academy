@@ -31,7 +31,7 @@ import { SidebarItemSingle } from "@/components/navigations/sidebar/item-single"
 import { useAuth } from "@/context/authContext";
 import { SidebarBrand } from "@/components/navigations/sidebar/sidebar-brand";
 
-const baseUrl = "/admin/dashboard";
+const baseUrl = "/instructor/dashboard";
 
 const sidebarItems = [
   {
@@ -40,44 +40,14 @@ const sidebarItems = [
     icon: Home,
   },
   {
-    title: "Users",
-    url: `${baseUrl}/users`,
-    icon: User,
-  },
-  {
-    title: "Instructors",
-    url: "#",
-    icon: Presentation,
-    items: [
-      {
-        title: "Instructors",
-        url: `${baseUrl}/instructors`,
-      },
-      {
-        title: "Applications",
-        url: `${baseUrl}/instructors/applications`,
-      },
-    ],
-  },
-  {
     title: "Courses",
-    url: "#",
+    url: `${baseUrl}/courses`,
     icon: LibraryBig,
   },
   {
-    title: "Transactions",
-    url: "#",
-    icon: ArrowLeftRight,
-  },
-  {
     title: "Vouchers",
-    url: "#",
+    url: `${baseUrl}/vouchers`,
     icon: TicketPercent,
-  },
-  {
-    title: "Reports",
-    url: "#",
-    icon: MessageSquareWarning,
   },
 ];
 
@@ -106,7 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const onLogout = () => {
     logout();
-    window.location.reload;
+    window.location.reload();
   };
 
   const onProfile = () => {
@@ -116,19 +86,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props} className="z-50">
       <SidebarHeader>
-        <SidebarBrand subtitle="Admin" />
+        <SidebarBrand subtitle="Instructor" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
-            {sidebarItems.map((item, index) =>
-              item.items && item.items.length > 0 ? (
-                <SidebarItemGroup key={index} item={item} />
-              ) : (
-                <SidebarItemSingle key={index} item={item} />
-              )
-            )}
+            {sidebarItems.map((item, index) => (
+              <SidebarItemSingle key={index} item={item} />
+            ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

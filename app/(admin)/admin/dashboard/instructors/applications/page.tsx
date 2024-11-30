@@ -42,6 +42,7 @@ import { Chip } from "@nextui-org/chip";
 import { Logo } from "@/components/icons";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { socialsList } from "@/config/socials";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -424,26 +425,32 @@ const ApplicationModal = ({
                 isReadOnly
               />
 
-              {application.socials?.map((social: any, index: number) => (
-                <Input
-                  key={index}
-                  value={social.link}
-                  startContent={getSocialIcon(social.type)}
-                  endContent={
-                    <Button
-                      as={Link}
-                      href={social.link}
-                      target="_blank"
-                      size="sm"
-                      variant="light"
-                      isIconOnly
-                    >
-                      <ExternalLink size={16} />
-                    </Button>
-                  }
-                  isReadOnly
-                />
-              ))}
+              {application.socials?.map((social: any, index: number) => {
+                const socialItem = socialsList.find(
+                  (item) => item.type === social.type
+                );
+
+                return (
+                  <Input
+                    key={index}
+                    value={social.link}
+                    startContent={socialItem?.icon}
+                    endContent={
+                      <Button
+                        as={Link}
+                        href={social.link}
+                        target="_blank"
+                        size="sm"
+                        variant="light"
+                        isIconOnly
+                      >
+                        <ExternalLink size={16} />
+                      </Button>
+                    }
+                    isReadOnly
+                  />
+                );
+              })}
 
               <Input
                 label="Status"

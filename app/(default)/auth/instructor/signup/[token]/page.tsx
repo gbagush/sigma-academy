@@ -5,17 +5,7 @@ import Link from "next/link";
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import { Logo } from "@/components/icons";
-import {
-  Eye,
-  EyeClosed,
-  Linkedin,
-  Github,
-  Dribbble,
-  Figma,
-  Link as LinkIcon,
-  Plus,
-  X,
-} from "lucide-react";
+import { Eye, EyeClosed, Plus, X } from "lucide-react";
 import {
   Dropdown,
   DropdownTrigger,
@@ -24,6 +14,7 @@ import {
 } from "@nextui-org/dropdown";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@nextui-org/checkbox";
+import { socialsList } from "@/config/socials";
 
 interface SocialLink {
   type: string;
@@ -73,23 +64,6 @@ export default function InstructorRegister({
 
   const handleSocialLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSocialLink(e.target.value);
-  };
-
-  const getSocialIcon = (type: string) => {
-    switch (type) {
-      case "linkedin":
-        return <Linkedin size={16} />;
-      case "github":
-        return <Github size={16} />;
-      case "dribbble":
-        return <Dribbble size={16} />;
-      case "figma":
-        return <Figma size={16} />;
-      case "link":
-        return <LinkIcon size={16} />;
-      default:
-        return null;
-    }
   };
 
   const handleAddSocial = () => {
@@ -307,7 +281,9 @@ export default function InstructorRegister({
               variant="bordered"
               readOnly
               placeholder={`Your ${social.type} link`}
-              startContent={getSocialIcon(social.type)}
+              startContent={
+                socialsList.find((item) => item.type === social.type)?.icon
+              }
             />
             <Button
               isIconOnly
@@ -357,41 +333,15 @@ export default function InstructorRegister({
             </Button>
           </DropdownTrigger>
           <DropdownMenu aria-label="Static Actions">
-            <DropdownItem
-              key="linkedin"
-              startContent={<Linkedin size={16} />}
-              onClick={() => setSelectedSocial("linkedin")}
-            >
-              Linkedin
-            </DropdownItem>
-            <DropdownItem
-              key="github"
-              startContent={<Github size={16} />}
-              onClick={() => setSelectedSocial("github")}
-            >
-              Github
-            </DropdownItem>
-            <DropdownItem
-              key="dribbble"
-              startContent={<Dribbble size={16} />}
-              onClick={() => setSelectedSocial("dribbble")}
-            >
-              Dribbble
-            </DropdownItem>
-            <DropdownItem
-              key="figma"
-              startContent={<Figma size={16} />}
-              onClick={() => setSelectedSocial("figma")}
-            >
-              Figma
-            </DropdownItem>
-            <DropdownItem
-              key="link"
-              startContent={<LinkIcon size={16} />}
-              onClick={() => setSelectedSocial("link")}
-            >
-              Link
-            </DropdownItem>
+            {socialsList.map((social) => (
+              <DropdownItem
+                key={social.type}
+                startContent={social.icon}
+                onClick={() => setSelectedSocial(social.type)}
+              >
+                {social.name}
+              </DropdownItem>
+            ))}
           </DropdownMenu>
         </Dropdown>
 
