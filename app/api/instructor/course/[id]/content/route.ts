@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { verifyTokenFromRequest } from "@/lib/jwt";
 
-// Utility function to validate ObjectId
 const isValidObjectId = (id: string) => {
   return ObjectId.isValid(id) && new ObjectId(id).toString() === id;
 };
@@ -67,10 +66,8 @@ export async function PUT(
 
   let courseId;
 
-  // Extract the body of the request
   const body = await request.json();
 
-  // Validate the incoming body structure
   if (!Array.isArray(body)) {
     return NextResponse.json(
       { message: "Invalid data format" },

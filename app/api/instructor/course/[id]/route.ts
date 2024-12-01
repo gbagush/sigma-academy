@@ -74,19 +74,28 @@ export async function PUT(
   try {
     const data = await request.formData();
 
-    const title = data.get("title") as string | "";
-    const description = data.get("description") as string | "";
-    const category = data.get("category") as string | "";
-    const language = data.get("language") as string | "";
-    const thumbnailFile = data.get("thumbnail") as File | null;
-    const status = data.get("status") as string | "";
+    const title = data.get("title") as string;
+    const description = data.get("description") as string;
+    const category = data.get("category") as string;
+    const language = data.get("language") as string;
+    const thumbnailFile = data.get("thumbnail") as File;
+    const status = data.get("status") as string;
     const price = data.get("price") as number | null;
     const discountedPrice = data.get("discountedPrice") as number | null;
+
+    if (!title || !description || !category || !language || !status) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const categoryId = new ObjectId(category);
 
     const updateData: any = {
       title,
       description,
-      category,
+      category: categoryId,
       language,
       status,
       price,

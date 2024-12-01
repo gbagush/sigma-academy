@@ -49,9 +49,9 @@ export async function POST(
     );
   }
 
-  if (data.description.length > 350) {
+  if (data.description.length > 500) {
     return NextResponse.json(
-      { message: "Description must be 350 characters or less" },
+      { message: "Description must be 500 characters or less" },
       { status: 400 }
     );
   }

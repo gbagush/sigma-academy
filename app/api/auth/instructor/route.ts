@@ -55,7 +55,13 @@ export async function PUT(request: NextRequest) {
   const { userId } = verificationResult.decoded;
   const data = await request.json();
 
-  const allowedFields = ["firstName", "lastName", "username"];
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "username",
+    "description",
+    "socials",
+  ];
 
   const invalidFields = Object.keys(data).filter(
     (field) => !allowedFields.includes(field)

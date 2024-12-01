@@ -1,4 +1,7 @@
 "use client";
+
+import { useState } from "react";
+
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -30,24 +33,47 @@ import {
 import { Skeleton } from "@nextui-org/skeleton";
 import { Avatar } from "@nextui-org/avatar";
 import { charLimit, wordLimit } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export const Navbar = () => {
   const { user, role, status, logout } = useAuth();
 
+  const [keyword, setKeyword] = useState("");
+  const router = useRouter();
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (keyword.trim()) {
+      router.push(`/search?keyword=${encodeURIComponent(keyword)}`);
+    }
+  };
+
   const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      labelPlacement="outside"
-      placeholder="What do you want to learn?"
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
+    <form className="w-full" onSubmit={handleSearchSubmit}>
+      <div className="flex w-full items-center gap-2">
+        <Input
+          aria-label="Search"
+          classNames={{
+            inputWrapper: "bg-default-100",
+            input: "text-sm",
+          }}
+          labelPlacement="outside"
+          placeholder="What do you want to learn?"
+          startContent={
+            <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+          }
+          type="search"
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+        <Button
+          type="submit"
+          variant="faded"
+          className="border-none text-foreground/75"
+        >
+          Search
+        </Button>
+      </div>
+    </form>
   );
 
   return (
@@ -128,11 +154,25 @@ export const Navbar = () => {
                   <DropdownItem
                     as={Link}
                     key="settings"
-                    href={`/auth/${role}/profile`}
+                    href={
+                      role == "user"
+                        ? "/auth/user/profile"
+                        : `/${role}/dashboard/profile`
+                    }
                   >
                     Profile
                   </DropdownItem>
-                  <DropdownItem key="courses">Courses</DropdownItem>
+                  {role == "user" ? (
+                    <DropdownItem key="my-courses">My Courses</DropdownItem>
+                  ) : (
+                    <DropdownItem
+                      as={Link}
+                      key="dashboard"
+                      href={`/${role}/dashboard`}
+                    >
+                      Dashboard
+                    </DropdownItem>
+                  )}
                 </DropdownSection>
 
                 <DropdownItem

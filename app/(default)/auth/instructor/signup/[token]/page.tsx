@@ -264,7 +264,7 @@ export default function InstructorRegister({
           placeholder="Write a description about yourself"
           minRows={3}
           maxRows={8}
-          maxLength={350}
+          maxLength={500}
           onChange={handleInputChange}
           disableAutosize
           required

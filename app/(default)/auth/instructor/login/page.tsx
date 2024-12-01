@@ -10,8 +10,14 @@ import { Logo } from "@/components/icons";
 import { Eye, EyeClosed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/authContext";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function UserLogin() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirectUrl = searchParams.get("redirect");
+
   const [showPassword, setShowPassword] = useState(false);
   const [loginData, setLoginData] = useState({
     email: "",
@@ -44,7 +50,12 @@ export default function UserLogin() {
       toast({ title: "Login successful!", description: "Welcome back!" });
 
       setTimeout(() => {
-        window.location.href = "/";
+        if (redirectUrl) {
+          const decodedUrl = decodeURIComponent(redirectUrl);
+          router.push(decodedUrl);
+        } else {
+          router.push("/");
+        }
       }, 2000);
     } catch (error) {
       if (axios.isAxiosError(error)) {

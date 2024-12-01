@@ -1,16 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
-import Link from "next/link";
 import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
+import { Input, Textarea } from "@nextui-org/input";
 import { Divider } from "@nextui-org/divider";
 import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardBody } from "@nextui-org/card";
 import { User } from "@nextui-org/user";
 import { useAuth } from "@/context/authContext";
-import { AtSign, Check, Trash2, X } from "lucide-react";
+import { AtSign, Check, Plus, Trash2, X } from "lucide-react";
 import { validateUsername } from "@/lib/utils";
 import {
   Modal,
@@ -20,7 +19,19 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
 import Image from "next/image";
+import { socialsList } from "@/config/socials";
+
+interface SocialLink {
+  type: string;
+  link: string;
+}
 
 export default function AdminProfile() {
   const { toast } = useToast();
@@ -31,6 +42,8 @@ export default function AdminProfile() {
     firstName: "",
     lastName: "",
     username: "",
+    description: "",
+    socials: [] as SocialLink[],
   });
 
   const [usernameErrors, setUsernameErrors] = useState<string[]>([]);
@@ -38,14 +51,20 @@ export default function AdminProfile() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
 
+  const [selectedSocial, setSelectedSocial] = useState<string | null>(null);
+  const [socialLink, setSocialLink] = useState("");
+
   useEffect(() => {
     if (user) {
       setUpdateData({
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username,
+        description: user.description,
+        socials: user.socials,
       });
-      setImagePreviewUrl(user.profilePicture);
+
+      console.log(user);
     }
   }, [user]);
 
@@ -274,6 +293,102 @@ export default function AdminProfile() {
               readOnly
             />
 
+            <Textarea
+              type="text"
+              name="description"
+              variant="bordered"
+              label="Description"
+              className="mt-4"
+              value={updateData.description}
+              onChange={handleInputChange}
+              required
+            />
+
+            {updateData.socials.map((social, index) => (
+              <div key={index} className="flex gap-2 mt-4">
+                <Input
+                  type="text"
+                  value={social.link}
+                  variant="bordered"
+                  readOnly
+                  placeholder={`Your ${social.type} link`}
+                  startContent={
+                    socialsList.find((item) => item.type === social.type)?.icon
+                  }
+                />
+                <Button
+                  isIconOnly
+                  type="button"
+                  variant="bordered"
+                  onClick={() => {
+                    setUpdateData((prev) => ({
+                      ...prev,
+                      socials: prev.socials.filter((_, i) => i !== index),
+                    }));
+                  }}
+                >
+                  <X size={16} />
+                </Button>
+              </div>
+            ))}
+
+            {selectedSocial && (
+              <div className="flex gap-2 mt-4">
+                <Input
+                  type="text"
+                  value={socialLink}
+                  variant="bordered"
+                  onChange={(e) => setSocialLink(e.target.value)}
+                  placeholder={`Enter your ${selectedSocial}`}
+                  required
+                />
+                <Button
+                  isIconOnly
+                  type="button"
+                  variant="bordered"
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    setUpdateData((prev) => ({
+                      ...prev,
+                      socials: [
+                        ...prev.socials,
+                        { type: selectedSocial, link: socialLink },
+                      ],
+                    }));
+
+                    setSocialLink("");
+                    setSelectedSocial(null);
+                  }}
+                >
+                  <Plus size={16} />
+                </Button>
+              </div>
+            )}
+
+            <Dropdown>
+              <DropdownTrigger>
+                <Button
+                  variant="bordered"
+                  className="mt-4"
+                  startContent={<Plus size={16} />}
+                >
+                  Add Socials
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Static Actions">
+                {socialsList.map((social) => (
+                  <DropdownItem
+                    key={social.type}
+                    startContent={social.icon}
+                    onClick={() => setSelectedSocial(social.type)}
+                  >
+                    {social.name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+
             <Divider className="my-4" />
             <Button onClick={handleSubmit}>Update Profile</Button>
           </CardBody>
@@ -294,7 +409,6 @@ export default function AdminProfile() {
                         className="relative w-80 h-80 group"
                         onClick={handleRemoveImage}
                       >
-                        {/* Image */}
                         <Image
                           src={decodeURIComponent(imagePreviewUrl)}
                           alt="Profile Picture"
@@ -302,7 +416,6 @@ export default function AdminProfile() {
                           objectFit="cover"
                           className="absolute top-0 left-0 transition-opacity duration-300 group-hover:opacity-75"
                         />
-                        {/* Trash Icon */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                           <Trash2 size={32} />
                         </div>
@@ -348,8 +461,8 @@ export default function AdminProfile() {
 
   if (status === "logout") {
     window.location.href = "/";
-    return null; // Prevent rendering after redirecting
+    return null;
   }
 
-  return null; // Fallback for unexpected states
+  return null;
 }
