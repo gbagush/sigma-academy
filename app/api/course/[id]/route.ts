@@ -89,23 +89,31 @@ export async function GET(
 
     const course = result[0];
 
-    const transformedSections =
-      course.sections?.map((section: any) => ({
-        ...section,
-        contents: section.contents.map((content: any) => ({
-          _id: content._id,
-          title: content.title,
-          url: content.preview ? content.url : undefined,
-          description: content.preview ? content.description : undefined,
-          preview: content.preview,
-        })),
-      })) || [];
-
     let responseData;
 
     if (enrollment) {
       responseData = { ...course, enrollmentId: enrollment._id };
+    } else if (
+      (!(verificationResult instanceof NextResponse) &&
+        verificationResult.decoded.userId ===
+          course.instructorDetails[0]._id.toString()) ||
+      (!(verificationResult instanceof NextResponse) &&
+        verificationResult.decoded.role === "admin")
+    ) {
+      responseData = { ...course, isCourseInstructor: true };
     } else {
+      const transformedSections =
+        course.sections?.map((section: any) => ({
+          ...section,
+          contents: section.contents.map((content: any) => ({
+            _id: content._id,
+            title: content.title,
+            url: content.preview ? content.url : undefined,
+            description: content.preview ? content.description : undefined,
+            preview: content.preview,
+          })),
+        })) || [];
+
       responseData = {
         ...course,
         sections: transformedSections,

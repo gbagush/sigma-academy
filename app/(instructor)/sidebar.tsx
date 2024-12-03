@@ -12,6 +12,7 @@ import {
   Home,
   TicketPercent,
   MessageSquareWarning,
+  Wallet,
 } from "lucide-react";
 
 import { NavUser } from "@/components/navigations/sidebar/sidebar-user";
@@ -35,19 +36,14 @@ const baseUrl = "/instructor/dashboard";
 
 const sidebarItems = [
   {
-    title: "Home",
-    url: `${baseUrl}`,
-    icon: Home,
-  },
-  {
     title: "Courses",
     url: `${baseUrl}/courses`,
     icon: LibraryBig,
   },
   {
-    title: "Vouchers",
-    url: `${baseUrl}/vouchers`,
-    icon: TicketPercent,
+    title: "Wallet",
+    url: `${baseUrl}/wallet`,
+    icon: Wallet,
   },
 ];
 

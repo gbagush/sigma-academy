@@ -14,17 +14,16 @@ export async function POST(request: NextRequest) {
   }
 
   if (verificationResult.decoded.role !== "user") {
-    return new NextResponse("You need a user account to purchase a course", {
-      status: 401,
-    });
+    return NextResponse.json(
+      { message: "You need a user account to purchase a course" },
+      { status: 401 }
+    );
   }
 
   const data = await request.json();
 
   if (!data.courseId) {
-    return new NextResponse("Invalid request", {
-      status: 400,
-    });
+    return NextResponse.json({ message: "Invalid request" }, { status: 400 });
   }
 
   let courseId;
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existEnrollment = await db.collection("enrollments").findOne({
-      userId: verificationResult.decoded.userId,
+      userId: new ObjectId(verificationResult.decoded.userId),
       courseId: courseId,
     });
 
@@ -178,6 +177,8 @@ export async function GET(request: NextRequest) {
             tax: 1,
             invoiceId: 1,
             invoiceUrl: 1,
+            paidAt: 1,
+            paymentMethod: 1,
             courseDetails: {
               _id: { $arrayElemAt: ["$courseDetails._id", 0] },
               title: { $arrayElemAt: ["$courseDetails.title", 0] },

@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/password";
 import { MongoError } from "mongodb";
 import { sendEmail } from "@/lib/mailer";
 import { emailConfirm } from "@/lib/mail-templates/email-confirm";
+import { randomUsername } from "@/lib/nanoid";
 
 export async function POST(request: NextRequest) {
   const data = await request.json();
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
       lastName: data.lastName,
       email: data.email,
       password: hashedPassword,
+      username: randomUsername(),
       registerAt: new Date(),
     };
 

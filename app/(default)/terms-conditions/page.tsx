@@ -7,7 +7,7 @@ export default function TermsAndConditions() {
       <div className="max-w-xl w-full text-start">
         <h1 className="text-4xl font-semibold">Terms and Conditions</h1>
         <p className="text-foreground/75 mt-2">
-          Last updated: November 26, 2024
+          Last updated: December 2, 2024
         </p>
 
         <p className="text-foreground/75 mt-8">
@@ -18,14 +18,14 @@ export default function TermsAndConditions() {
           please refrain from using our platform.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">1. Nature of the Project</h2>
+        <h2 className="text-xl font-semibold mt-4">Nature of the Project</h2>
         <p className="text-foreground/75">
           Sigma Academy is a non-commercial educational platform. All content
           available on this platform is sourced from publicly available free
           resources on the internet.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">2. Use of Content</h2>
+        <h2 className="text-xl font-semibold mt-4">Use of Content</h2>
         <p className="text-foreground/75">
           All materials provided on Sigma Academy are for personal and
           educational purposes only. We do not claim ownership of the content
@@ -33,7 +33,7 @@ export default function TermsAndConditions() {
           may be subject to the original license terms.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">3. User Responsibilities</h2>
+        <h2 className="text-xl font-semibold mt-4">User Responsibilities</h2>
         <p className="text-foreground/75">
           By using Sigma Academy, you agree to:
         </p>
@@ -47,7 +47,7 @@ export default function TermsAndConditions() {
           </li>
         </ul>
 
-        <h2 className="text-xl font-semibold mt-4">4. Intellectual Property</h2>
+        <h2 className="text-xl font-semibold mt-4">Intellectual Property</h2>
         <p className="text-foreground/75">
           Sigma Academy does not own the content provided unless explicitly
           mentioned. All third-party content remains the intellectual property
@@ -55,9 +55,7 @@ export default function TermsAndConditions() {
           such content.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">
-          5. Limitations of Liability
-        </h2>
+        <h2 className="text-xl font-semibold mt-4">Limitations of Liability</h2>
         <p className="text-foreground/75">
           Sigma Academy and its creators make no warranties regarding the
           accuracy, reliability, or completeness of the materials provided. We
@@ -66,7 +64,7 @@ export default function TermsAndConditions() {
         </p>
 
         <h2 className="text-xl font-semibold mt-4">
-          6. Modifications to the Platform
+          Modifications to the Platform
         </h2>
         <p className="text-foreground/75">
           Sigma Academy reserves the right to modify or discontinue any part of
@@ -74,16 +72,14 @@ export default function TermsAndConditions() {
           updates or removal, platform updates, or other improvements.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">
-          7. Links to External Sites
-        </h2>
+        <h2 className="text-xl font-semibold mt-4">Links to External Sites</h2>
         <p className="text-foreground/75">
           The platform may include links to external websites for reference or
           additional resources. Sigma Academy is not responsible for the content
           or privacy practices of these external sites.
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">8. Reporting Issues</h2>
+        <h2 className="text-xl font-semibold mt-4">Reporting Issues</h2>
         <p className="text-foreground/75">
           If you believe any content violates licensing terms or intellectual
           property rights, please contact us at:{" "}
@@ -95,13 +91,7 @@ export default function TermsAndConditions() {
           </Link>
         </p>
 
-        <h2 className="text-xl font-semibold mt-4">9. Governing Law</h2>
-        <p className="text-foreground/75">
-          These Terms are governed by the laws of [Your Jurisdiction], and any
-          disputes arising will be resolved exclusively in [Your Jurisdiction].
-        </p>
-
-        <h2 className="text-xl font-semibold mt-4">10. Contact Us</h2>
+        <h2 className="text-xl font-semibold mt-4">Contact Us</h2>
         <p className="text-foreground/75">
           For any questions or concerns regarding these Terms, please contact us
           at:{" "}

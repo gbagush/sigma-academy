@@ -28,6 +28,8 @@ export const viewport: Viewport = {
   ],
 };
 
+export const fetchCache = "force-no-store";
+
 export default function RootLayout({
   children,
 }: {

@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
+import { Card, CardBody } from "@nextui-org/card";
 import Image from "next/image";
 import Link from "next/link";
 

@@ -54,6 +54,8 @@ export default function AdminProfile() {
   const [selectedSocial, setSelectedSocial] = useState<string | null>(null);
   const [socialLink, setSocialLink] = useState("");
 
+  const [requestChangePassword, setRequestChangePassword] = useState(false);
+
   useEffect(() => {
     if (user) {
       setUpdateData({
@@ -195,6 +197,20 @@ export default function AdminProfile() {
         });
       }
     }
+  };
+
+  const handleChangePasswordRequest = async () => {
+    setRequestChangePassword(true);
+
+    const response = await axios.post(`/api/auth/instructor/change-password`, {
+      email: user.email,
+    });
+
+    toast({
+      title: "Email Sent",
+      description:
+        response.data.message || "Please check your inbox for instructions.",
+    });
   };
 
   if (status === "loading")
@@ -388,6 +404,15 @@ export default function AdminProfile() {
                 ))}
               </DropdownMenu>
             </Dropdown>
+
+            <span className="mt-4 text-sm">Password</span>
+            <Button
+              className="mt-2 w-40"
+              isDisabled={requestChangePassword}
+              onClick={async () => await handleChangePasswordRequest()}
+            >
+              Change Password
+            </Button>
 
             <Divider className="my-4" />
             <Button onClick={handleSubmit}>Update Profile</Button>

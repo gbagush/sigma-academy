@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let result;
-
-    result = await db
+    const result = await db
       .collection("courses")
       .aggregate([
         {

@@ -6,13 +6,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/icons";
+import { useRouter } from "next/navigation";
 
 export function SidebarBrand({ subtitle }: { subtitle: string }) {
+  const router = useRouter();
   return (
-    <SidebarMenu>
+    <SidebarMenu onClick={() => router.push("/")}>
       <SidebarMenuItem>
         <SidebarMenuButton
           size="lg"

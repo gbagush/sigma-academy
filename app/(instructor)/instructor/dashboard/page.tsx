@@ -1,5 +1,7 @@
 "use client";
 
+import { Router } from "next/router";
+
 export default function InstructorDashboard() {
   return (
     <div>

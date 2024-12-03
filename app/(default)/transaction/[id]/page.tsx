@@ -133,7 +133,7 @@ export default function Transaction({ params }: { params: { id: string } }) {
     <section className="py-4">
       <Breadcrumbs>
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem>Transaction</BreadcrumbItem>
+        <BreadcrumbItem href="/transaction">Transaction</BreadcrumbItem>
         <BreadcrumbItem>Details</BreadcrumbItem>
       </Breadcrumbs>
 
@@ -243,7 +243,8 @@ export default function Transaction({ params }: { params: { id: string } }) {
                     </h3>
                   </div>
 
-                  {!transaction.paidAt ? (
+                  {!transaction.paidAt &&
+                  new Date(transaction.dueDate) > new Date() ? (
                     <>
                       <div className="mt-4 text-sm text-foreground/75">
                         <span>Click Check Payment button after payment.</span>
@@ -257,6 +258,20 @@ export default function Transaction({ params }: { params: { id: string } }) {
                       >
                         Pay Now
                       </Button>
+                      <Button
+                        className="w-full mt-4"
+                        color="secondary"
+                        onPress={handleCheckPayemnt}
+                      >
+                        Check Payemnt
+                      </Button>
+                    </>
+                  ) : !transaction.paidAt &&
+                    new Date(transaction.dueDate) < new Date() ? (
+                    <>
+                      <div className="mt-4 text-sm text-foreground/75">
+                        <span>Click Check Payment button after payment.</span>
+                      </div>
                       <Button
                         className="w-full mt-4"
                         color="secondary"

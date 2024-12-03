@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
       <div className="max-w-xl w-full text-start">
         <h1 className="text-4xl font-semibold">Privacy Policy</h1>
         <p className="text-foreground/75 mt-2">
-          Last updated: November 26, 2024
+          Last updated: December 2, 2024
         </p>
 
         <p className="text-foreground/75 mt-8">
@@ -75,10 +75,7 @@ export default function PrivacyPolicy() {
         </p>
         <ul className="list-disc list-inside">
           <li>
-            <strong>IPaymu</strong> for processing payment transactions.
-          </li>
-          <li>
-            <strong>Google Analytics</strong> for analyzing website usage data.
+            <strong>Xendit</strong> for processing payment transactions.
           </li>
         </ul>
 
