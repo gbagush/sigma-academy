@@ -65,6 +65,17 @@ interface InstructorDetail {
   username: string;
 }
 
+interface Voucher {
+  _id: string;
+  type: string;
+  creatorId: string;
+  code: string;
+  discount: number;
+  createdAt: string;
+  updatedAt: string;
+  expirationDate: string;
+}
+
 const formatCurrency = (amount: string) => {
   const number = parseFloat(amount);
   return `Rp${new Intl.NumberFormat("id-ID", {
@@ -77,7 +88,14 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [voucherCode, setVoucherCode] = useState("");
+  const [voucherData, setVoucherData] = useState<Voucher | null>();
+  const [voucherStatus, setVoucherStatus] = useState({
+    isLoaded: false,
+    isValid: false,
+    reason: "",
+  });
 
   const { status } = useAuth();
   const { toast } = useToast();
@@ -103,11 +121,85 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
     }
   }, [status]);
 
+  useEffect(() => {
+    const getVoucherData = async () => {
+      if (!voucherCode) {
+        setVoucherData(null);
+        return;
+      }
+      try {
+        const result = await axios.get(`/api/voucher?code=${voucherCode}`);
+
+        setVoucherData(result.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          return;
+        } else {
+          toast({
+            title: "Error apply voucher",
+            description: "Network error. Please try again.",
+          });
+        }
+
+        setVoucherData(null);
+      }
+    };
+
+    getVoucherData();
+  }, [voucherCode]);
+
+  useEffect(() => {
+    if (voucherData) {
+      if (voucherData.type == "instructor") {
+        if (voucherData.createdAt == course?.instructorId) {
+          setVoucherStatus({
+            isValid: true,
+            isLoaded: true,
+            reason: "Voucher apllied",
+          });
+        } else {
+          setVoucherStatus({
+            isLoaded: true,
+            isValid: false,
+            reason: "You cant use this voucher for this course",
+          });
+        }
+      } else {
+        setVoucherStatus({
+          reason: "Voucher apllied",
+          isValid: true,
+          isLoaded: true,
+        });
+      }
+    } else {
+      setVoucherStatus({
+        isLoaded: false,
+        isValid: false,
+        reason: "",
+      });
+    }
+  }, [voucherData]);
+
+  useEffect(() => {
+    console.log(voucherData);
+  }, [voucherData]);
+
   const handleEnroll = async () => {
     try {
-      const result = await axios.post(`/api/transaction`, {
-        courseId: params.id,
-      });
+      let requestData;
+
+      if (voucherData && voucherStatus.isLoaded && voucherStatus.isValid) {
+        requestData = {
+          courseId: params.id,
+          voucherId: voucherData._id,
+        };
+      } else {
+        requestData = {
+          courseId: params.id,
+        };
+      }
+
+      const result = await axios.post(`/api/transaction`, requestData);
 
       toast({
         title: "Success",
@@ -242,25 +334,70 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
                       {formatCurrency(course.discountedPrice)}
                     </h3>
                   </div>
+                  {voucherStatus.isLoaded &&
+                    voucherStatus.isValid &&
+                    voucherData && (
+                      <div className="flex items-center gap-8 text-md justify-between">
+                        <h3 className="">Voucher Disount</h3>
+                        <h3 className="">
+                          -
+                          {formatCurrency(
+                            (
+                              (parseInt(course.discountedPrice) *
+                                voucherData?.discount) /
+                              100
+                            ).toString()
+                          )}
+                        </h3>
+                      </div>
+                    )}
                   <div className="flex items-center gap-8 text-sm text-foreground/75 justify-between">
                     <h3 className="">Tax</h3>
                     <h3 className="">
-                      {formatCurrency(
-                        (
-                          parseFloat(course.discountedPrice) * taxRate
-                        ).toString()
-                      )}
+                      {voucherStatus.isLoaded &&
+                      voucherStatus.isValid &&
+                      voucherData
+                        ? formatCurrency(
+                            (
+                              (parseFloat(course.discountedPrice) -
+                                (parseInt(course.discountedPrice) *
+                                  voucherData?.discount) /
+                                  100) *
+                              taxRate
+                            ).toString()
+                          )
+                        : formatCurrency(
+                            (
+                              parseFloat(course.discountedPrice) * taxRate
+                            ).toString()
+                          )}
                     </h3>
                   </div>
                   <div className="flex items-center gap-8 justify-between mt-4">
                     <h3 className="text-lg font-semibold">Final Price</h3>
                     <h3 className="text-lg font-semibold">
-                      {formatCurrency(
-                        (
-                          parseFloat(course.discountedPrice) +
-                          parseFloat(course.discountedPrice) * taxRate
-                        ).toString()
-                      )}
+                      {voucherStatus.isLoaded &&
+                      voucherStatus.isValid &&
+                      voucherData
+                        ? formatCurrency(
+                            (
+                              parseFloat(course.discountedPrice) -
+                              (parseInt(course.discountedPrice) *
+                                voucherData?.discount) /
+                                100 +
+                              (parseFloat(course.discountedPrice) -
+                                (parseInt(course.discountedPrice) *
+                                  voucherData?.discount) /
+                                  100) *
+                                taxRate
+                            ).toString()
+                          )
+                        : formatCurrency(
+                            (
+                              parseFloat(course.discountedPrice) +
+                              parseFloat(course.discountedPrice) * taxRate
+                            ).toString()
+                          )}
                     </h3>
                   </div>
                   <div className="mt-4">
@@ -268,6 +405,13 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
                       type="text"
                       label="Voucher Code (optional)"
                       value={voucherCode}
+                      isInvalid={
+                        voucherStatus.isLoaded ? !voucherStatus.isValid : false
+                      }
+                      color={voucherStatus.isValid ? "success" : "default"}
+                      errorMessage={
+                        voucherStatus.isLoaded ? voucherStatus.reason : ""
+                      }
                       onChange={(e) => setVoucherCode(e.target.value)}
                     />
                   </div>

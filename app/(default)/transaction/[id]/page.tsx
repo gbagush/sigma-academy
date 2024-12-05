@@ -34,6 +34,8 @@ interface Transaction {
   courseDetails: CourseDetail[];
   paidAt?: string;
   paymentMethod?: string;
+  voucherDiscount?: number;
+  voucherId?: string;
 }
 
 interface CourseDetail {
@@ -64,7 +66,7 @@ export default function Transaction({ params }: { params: { id: string } }) {
         const result = await axios.get(`/api/transaction/${params.id}`);
         setTransaction(result.data.data[0]);
       } catch (err) {
-        setError("Failed to fetch course data.");
+        setError("Failed to fetch transaction data.");
       } finally {
         setLoading(false);
       }
@@ -227,18 +229,47 @@ export default function Transaction({ params }: { params: { id: string } }) {
                     <h3 className="">Amount</h3>
                     <h3 className="">{formatCurrency(transaction.amount)}</h3>
                   </div>
+
+                  {transaction.voucherDiscount !== undefined && (
+                    <div className="flex items-center gap-8 text-md justify-between">
+                      <h3 className="">Voucher Discount</h3>
+                      <h3 className="">
+                        -
+                        {formatCurrency(
+                          (transaction.amount * transaction.voucherDiscount) /
+                            100
+                        )}
+                      </h3>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-8 text-sm text-foreground/75 justify-between">
                     <h3 className="">Tax</h3>
                     <h3 className="">
-                      {formatCurrency(transaction.amount * transaction.tax)}
+                      {transaction.voucherDiscount !== undefined
+                        ? formatCurrency(
+                            (transaction.amount -
+                              transaction.amount *
+                                (transaction.voucherDiscount / 100)) *
+                              transaction.tax
+                          )
+                        : formatCurrency(transaction.amount * transaction.tax)}
                     </h3>
                   </div>
                   <div className="flex items-center gap-8 justify-between mt-4">
                     <h3 className="text-lg font-semibold">Final Price</h3>
                     <h3 className="text-lg font-semibold">
                       {formatCurrency(
-                        transaction.amount +
-                          transaction.amount * transaction.tax
+                        transaction.voucherDiscount !== undefined
+                          ? transaction.amount -
+                              transaction.amount *
+                                (transaction.voucherDiscount / 100) +
+                              (transaction.amount -
+                                transaction.amount *
+                                  (transaction.voucherDiscount / 100)) *
+                                transaction.tax
+                          : transaction.amount +
+                              transaction.amount * transaction.tax
                       )}
                     </h3>
                   </div>

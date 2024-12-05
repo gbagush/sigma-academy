@@ -33,6 +33,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid id format" }, { status: 400 });
   }
 
+  let voucherId;
+
+  if (data.voucherId) {
+    try {
+      voucherId = new ObjectId(data.voucherId);
+    } catch (error) {
+      return NextResponse.json(
+        { message: "Invalid id format" },
+        { status: 400 }
+      );
+    }
+  }
+
   try {
     const course = await db
       .collection("courses")
@@ -42,6 +55,38 @@ export async function POST(request: NextRequest) {
       return new NextResponse("Course not found", {
         status: 404,
       });
+    }
+
+    let voucher;
+
+    if (data.voucherId) {
+      voucher = await db.collection("vouchers").findOne({ _id: voucherId });
+
+      if (!voucher) {
+        return new NextResponse("Voucher not found", { status: 404 });
+      }
+
+      const transactionUsing = await db.collection("transactions").findOne({
+        voucherId: new ObjectId(voucher._id),
+        userId: new ObjectId(verificationResult.decoded.userId),
+        $or: [{ dueDate: { $gte: new Date() } }, { paidAt: { $exists: true } }],
+      });
+
+      if (transactionUsing) {
+        return NextResponse.json(
+          { message: "Voucher already used" },
+          { status: 400 }
+        );
+      }
+
+      if (voucher.type == "instructor") {
+        if (voucher.creatorId !== course.instructorId) {
+          return NextResponse.json(
+            { message: "Cant use voucher for this transaction" },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     const existEnrollment = await db.collection("enrollments").findOne({
@@ -73,18 +118,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transaction = await db.collection("transactions").insertOne({
-      userId: new ObjectId(verificationResult.decoded.userId),
-      courseId,
-      createdAt: new Date(),
-      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      amount: parseFloat(course.discountedPrice),
-      tax: taxRate,
-    });
+    let transaction;
 
-    const finalPrice =
-      parseFloat(course.discountedPrice) +
-      parseFloat(course.discountedPrice) * taxRate;
+    if (data.voucherId && voucher) {
+      transaction = await db.collection("transactions").insertOne({
+        userId: new ObjectId(verificationResult.decoded.userId),
+        courseId,
+        createdAt: new Date(),
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        amount: parseFloat(course.discountedPrice),
+        tax: taxRate,
+        voucherId: new ObjectId(data.voucherId),
+        voucherDiscount: voucher.discount,
+      });
+    } else {
+      transaction = await db.collection("transactions").insertOne({
+        userId: new ObjectId(verificationResult.decoded.userId),
+        courseId,
+        createdAt: new Date(),
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        amount: parseFloat(course.discountedPrice),
+        tax: taxRate,
+      });
+    }
+
+    let finalPrice;
+    if (data.voucherId && voucher) {
+      finalPrice =
+        parseFloat(course.discountedPrice) -
+        (parseFloat(course.discountedPrice) * voucher.discount) / 100 +
+        ((parseFloat(course.discountedPrice) * voucher.discount) / 100) *
+          taxRate;
+    } else {
+      finalPrice =
+        parseFloat(course.discountedPrice) +
+        parseFloat(course.discountedPrice) * taxRate;
+    }
 
     const invoiceData: CreateInvoiceRequest = {
       externalId: transaction.insertedId.toString(),

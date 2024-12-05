@@ -57,6 +57,8 @@ export async function GET(
             invoiceUrl: 1,
             paidAt: 1,
             paymentMethod: 1,
+            voucherId: 1,
+            voucherDiscount: 1,
             courseDetails: {
               _id: { $arrayElemAt: ["$courseDetails._id", 0] },
               title: { $arrayElemAt: ["$courseDetails.title", 0] },

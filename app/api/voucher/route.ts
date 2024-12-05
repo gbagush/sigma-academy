@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const voucher = await db.collection("vouchers").findOne({
-      _id: new ObjectId(code),
+      code: code,
       expirationDate: { $gte: new Date() },
     });
 
