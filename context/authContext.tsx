@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   token: string | null;
@@ -26,6 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     "loading"
   );
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const router = useRouter();
 
   const fetchUserData = async (token: string, role: string) => {
     try {
@@ -69,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setToken(null);
     setRole(null);
     setUser(null);
+    router.push("/");
   };
 
   useEffect(() => {

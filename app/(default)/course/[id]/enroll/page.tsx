@@ -18,6 +18,7 @@ import { useAuth } from "@/context/authContext";
 import Link from "next/link";
 import { taxRate } from "@/config/transaction";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@nextui-org/input";
 
 interface CourseData {
   _id: string;
@@ -76,7 +77,7 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedContent, setSelectedContent] = useState<Content>();
+  const [voucherCode, setVoucherCode] = useState("");
 
   const { status } = useAuth();
   const { toast } = useToast();
@@ -169,7 +170,7 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
         </div>
 
         <div className="min-w-2xl max-w-xl w-full">
-          <div className="flex flex-col gap-4 md:flex-row mt-8 w-full items-center justify-center">
+          <div className="flex flex-col gap-4 md:flex-row mt-4 w-full items-center justify-center">
             <div className="w-full md:w-1/2 flex gap-4 items-center justify-center text-foreground/75">
               <Globe size={20} />
               <span className="text-sm">
@@ -194,7 +195,7 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
               </span>
             </div>
           </div>
-          <div className="mt-8">
+          <div className="mt-4">
             {course.status == "ongoing" ? (
               <Chip variant="flat" color="default">
                 On Going
@@ -261,6 +262,14 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
                         ).toString()
                       )}
                     </h3>
+                  </div>
+                  <div className="mt-4">
+                    <Input
+                      type="text"
+                      label="Voucher Code (optional)"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                    />
                   </div>
                   <Button
                     className="w-full mt-4"

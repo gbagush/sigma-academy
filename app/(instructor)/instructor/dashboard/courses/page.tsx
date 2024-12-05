@@ -11,26 +11,10 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Pagination } from "@nextui-org/pagination";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@nextui-org/dropdown";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from "@nextui-org/modal";
-import { Input, Textarea } from "@nextui-org/input";
+import { Input } from "@nextui-org/input";
 
 import { Button } from "@nextui-org/button";
 import { Plus, Search, Settings } from "lucide-react";
-import { create } from "domain";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import Link from "next/link";

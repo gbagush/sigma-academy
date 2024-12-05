@@ -89,6 +89,8 @@ export async function PUT(
       ? new ObjectId(section._id)
       : new ObjectId(),
     title: section.title,
+    createdAt: section.createdAt || new Date(),
+    updatedAt: new Date(),
     contents: section.contents.map((content: any) => ({
       _id: isValidObjectId(content._id)
         ? new ObjectId(content._id)
@@ -97,10 +99,9 @@ export async function PUT(
       url: content.url,
       description: content.description,
       preview: content.preview,
+      createdAt: content.createdAt || new Date(),
     })),
   }));
-
-  console.log(sectionsToUpdate);
 
   try {
     const result = await db.collection("courses").updateOne(

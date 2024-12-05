@@ -94,13 +94,16 @@ export async function GET(
     if (enrollment) {
       responseData = { ...course, enrollmentId: enrollment._id };
     } else if (
-      (!(verificationResult instanceof NextResponse) &&
-        verificationResult.decoded.userId ===
-          course.instructorDetails[0]._id.toString()) ||
-      (!(verificationResult instanceof NextResponse) &&
-        verificationResult.decoded.role === "admin")
+      !(verificationResult instanceof NextResponse) &&
+      verificationResult.decoded.userId ===
+        course.instructorDetails[0]._id.toString()
     ) {
-      responseData = { ...course, isCourseInstructor: true };
+      responseData = { ...course, isInstructor: true };
+    } else if (
+      !(verificationResult instanceof NextResponse) &&
+      verificationResult.decoded.role === "admin"
+    ) {
+      responseData = { ...course, isAdmin: true };
     } else {
       const transformedSections =
         course.sections?.map((section: any) => ({

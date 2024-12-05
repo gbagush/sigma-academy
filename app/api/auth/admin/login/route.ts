@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/mailer";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { generateToken } from "@/lib/jwt";
+import { randomUsername } from "@/lib/nanoid";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -28,7 +29,6 @@ export async function GET(request: NextRequest) {
     .findOneAndDelete({ _id: objectId, type: "magic-token" });
 
   if (result === null) {
-    console.log("Its Not Found Bro");
     return NextResponse.json({ message: "Token not found" }, { status: 404 });
   }
 
@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
     {
       $setOnInsert: {
         email: data.email,
+        username: randomUsername(),
       },
     },
     { upsert: true, returnDocument: "after" }

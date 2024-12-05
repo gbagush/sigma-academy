@@ -8,7 +8,19 @@ import ReactPlayer from "react-player";
 
 import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/breadcrumbs";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
-import { Check, Eye, Globe, RefreshCcw, TvMinimalPlay } from "lucide-react";
+import { Pagination } from "@nextui-org/pagination";
+import {
+  Check,
+  Dot,
+  Eye,
+  Globe,
+  MessageSquare,
+  RefreshCcw,
+  Send,
+  Settings,
+  Star,
+  TvMinimalPlay,
+} from "lucide-react";
 import { Chip } from "@nextui-org/chip";
 import { User } from "@nextui-org/user";
 import { Card, CardBody } from "@nextui-org/card";
@@ -16,6 +28,8 @@ import { Divider } from "@nextui-org/divider";
 import { Button } from "@nextui-org/button";
 import { useAuth } from "@/context/authContext";
 import Link from "next/link";
+import { Textarea } from "@nextui-org/input";
+import { useToast } from "@/hooks/use-toast";
 
 interface CourseData {
   _id: string;
@@ -35,7 +49,10 @@ interface CourseData {
   instructorDetails: InstructorDetail[];
   categoryDetails: CategoryDetails;
   enrollmentId?: string;
+  isInstructor?: boolean;
+  isAdmin?: boolean;
 }
+
 interface Section {
   _id: string;
   title: string;
@@ -63,6 +80,32 @@ interface InstructorDetail {
   username: string;
 }
 
+export interface ReviewStats {
+  reviews: Review[];
+  total: number;
+  currentPage: number;
+  limit: number;
+  average?: number;
+}
+
+export interface Review {
+  _id: string;
+  userId: string;
+  courseId: string;
+  rating: number;
+  review: string;
+  userDetails: UserDetails;
+  updatedAt: string;
+}
+
+export interface UserDetails {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  profilePicture: string;
+}
+
 const formatCurrency = (amount: string) => {
   const number = parseFloat(amount);
   return `Rp${new Intl.NumberFormat("id-ID", {
@@ -77,7 +120,7 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<Content>();
 
-  const { status } = useAuth();
+  const { role, status } = useAuth();
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -116,16 +159,13 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
 
       <div className="flex flex-col items-center justify-center text-center mt-8">
         <div className="min-w-xl max-w-2xl">
-          {course.enrollmentId && (
-            <Chip className="mb-2" color="primary">
-              Enrolled
-            </Chip>
-          )}
+          <Chip className="mb-2" color="primary">
+            {course.categoryDetails.name}
+          </Chip>
           <h1 className="text-xl md:text-3xl font-semibold">{course.title}</h1>
         </div>
-
         <div className="min-w-2xl max-w-xl w-full">
-          <div className="flex flex-col gap-4 md:flex-row mt-8 w-full items-center justify-center">
+          <div className="flex flex-col gap-4 md:flex-row mt-4 w-full items-center justify-center">
             <div className="w-full md:w-1/2 flex gap-4 items-center justify-center text-foreground/75">
               <Globe size={20} />
               <span className="text-sm">
@@ -150,7 +190,7 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
               </span>
             </div>
           </div>
-          <div className="mt-8">
+          <div className="mt-4">
             {course.status == "ongoing" ? (
               <Chip variant="flat" color="default">
                 On Going
@@ -162,8 +202,27 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
             )}
           </div>
         </div>
-
-        <div className="flex flex-col md:flex-row w-full mt-12">
+        <div className="flex w-full justify-end gap-2  mt-12">
+          {(course.enrollmentId || course.isInstructor || course.isAdmin) && (
+            <Button
+              as={Link}
+              href={`/course/${params.id}/forum`}
+              color="primary"
+            >
+              <MessageSquare size={16} /> Forum
+            </Button>
+          )}
+          {course.isInstructor && (
+            <Button
+              as={Link}
+              href={`/instructor/dashboard/courses/${params.id}`}
+              color="primary"
+            >
+              <Settings size={16} /> Manage
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-col md:flex-row w-full">
           <div className="w-full md:w-3/5 md:p-4">
             {selectedContent == null ? (
               <Image
@@ -218,12 +277,7 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
             </Accordion>
           </div>
         </div>
-
         <div className="flex flex-col gap-8 justify-start items-start w-full py-4">
-          <div className="flex flex-col gap-4 max-w-2xl text-start">
-            <h4 className="text-md md:text-lg font-semibold">Description</h4>
-            <p className="text-sm text-foreground/75">{course.description}</p>
-          </div>
           <div className="flex flex-col gap-4 max-w-2xl text-start">
             <h4 className="text-md md:text-lg font-semibold">
               Learn with Expert
@@ -236,9 +290,14 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
               }}
             />
           </div>
+          <div className="flex flex-col gap-4 max-w-2xl text-start">
+            <h4 className="text-md md:text-lg font-semibold">
+              Course Description
+            </h4>
+            <p className="text-sm text-foreground/75">{course.description}</p>
+          </div>
         </div>
-
-        {course.enrollmentId == null && (
+        {course.enrollmentId == null && role == "user" && (
           <div className="flex flex-col gap-4 w-full justify-center items-center py-8">
             <h2 className="text-2xl font-semibold">Enroll Now</h2>
             <Card className="max-w-xs p-4">
@@ -301,7 +360,239 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
             </Card>
           </div>
         )}
+
+        <RatingSection course={course} />
       </div>
     </section>
   );
 }
+
+const RatingSection = ({ course }: { course: CourseData }) => {
+  const [reviewData, setReviewData] = useState({
+    rating: 0,
+    review: "",
+  });
+
+  const [reviews, setReviews] = useState<ReviewStats>();
+  const [page, setPage] = useState(1);
+
+  const { role, user } = useAuth();
+  const { toast } = useToast();
+
+  const handleRating = (value: number) => {
+    setReviewData({ ...reviewData, rating: value });
+  };
+
+  useEffect(() => {
+    const fetchReview = async () => {
+      if (role == "user") {
+        try {
+          const result = await axios.get(`/api/review/${course._id}/my`);
+
+          if (
+            result.data.data &&
+            result.data.data.rating &&
+            result.data.data.review
+          ) {
+            setReviewData({
+              rating: result.data.data.rating,
+              review: result.data.data.review,
+            });
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (error.status == 404) {
+              return;
+            }
+            toast({
+              title: "Failed get review",
+              description: error.response?.data.message || "An error occurred.",
+            });
+          } else {
+            toast({
+              title: "Failed get review",
+              description: "Network error. Please try again.",
+            });
+          }
+        }
+      }
+    };
+
+    fetchReview();
+  }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const result = await axios.get(
+          `/api/review/${course._id}?page=${page - 1}`
+        );
+        setReviews(result.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast({
+            title: "Failed get reviews",
+            description: error.response?.data.message || "An error occurred.",
+          });
+        } else {
+          toast({
+            title: "Failed get reviews",
+            description: "Network error. Please try again.",
+          });
+        }
+      }
+    };
+
+    fetchReviews();
+  }, [page]);
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("rating", reviewData.rating.toString());
+      formData.append("review", reviewData.review);
+
+      await axios.post(`/api/review/${course._id}`, formData);
+
+      toast({
+        title: "Review submitted successfully",
+        description: "Thank you for your review!",
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast({
+          title: "Failed submit review",
+          description: error.response?.data.message || "An error occurred.",
+        });
+      } else {
+        toast({
+          title: "Failed submit review",
+          description: "Network error. Please try again.",
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-8 justify-start items-start w-full py-4">
+      <div className="flex flex-col gap-4 max-w-2xl w-full text-start">
+        {course.enrollmentId != null && role == "user" && user && (
+          <>
+            <User
+              name={`${user.firstName} ${user.lastName}`}
+              description="Review"
+              className="justify-start"
+              avatarProps={{
+                src: user.profilePicture
+                  ? user.profilePicture
+                  : `https://api.dicebear.com/9.x/initials/svg?seed=${user.firstName}`,
+              }}
+            />
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((value: number) => (
+                <Button
+                  key={value}
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onClick={() => handleRating(value)}
+                >
+                  <Star
+                    fill={value <= reviewData.rating ? "orange" : "none"}
+                    strokeWidth={value <= reviewData.rating ? 0 : 1}
+                  />
+                </Button>
+              ))}
+            </div>
+            <div className="w-full">
+              <Textarea
+                label="Review"
+                variant="bordered"
+                className="min-w-sm max-w-sm w-full"
+                max={250}
+                value={reviewData.review}
+                onChange={(e) =>
+                  setReviewData({ ...reviewData, review: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex max-w-sm justify-end">
+              <Button onClick={handleSubmit}>
+                <Send size={16} /> Send
+              </Button>
+            </div>
+          </>
+        )}
+        <h4 className="text-md md:text-lg font-semibold">Reviews</h4>
+        {reviews != null && (
+          <div className="flex flex-col gap-2 max-w-2xl w-full text-start">
+            <div className="flex items-center">
+              <Star className="mr-2" fill="orange" strokeWidth={0} />
+              {reviews.average}
+              <Dot />
+              {reviews.total}&#160;&#160;Reviews
+            </div>
+          </div>
+        )}
+        {reviews &&
+          reviews.reviews.map((review) => (
+            <div className="flex flex-col" key={review._id}>
+              {reviews &&
+                reviews.reviews.map((review) => (
+                  <>
+                    <User
+                      name={`${review.userDetails.firstName} ${review.userDetails.lastName}`}
+                      description={new Date(review.updatedAt).toLocaleString(
+                        "en-US",
+                        {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        }
+                      )}
+                      avatarProps={{
+                        src: review.userDetails.profilePicture,
+                      }}
+                      className="justify-start"
+                    />
+                    <div className="flex mt-2" key={review._id}>
+                      {[1, 2, 3, 4, 5].map((value: number) => (
+                        <Button
+                          key={value}
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                        >
+                          <Star
+                            fill={value <= review.rating ? "orange" : "none"}
+                            strokeWidth={value <= review.rating ? 0 : 1}
+                          />
+                        </Button>
+                      ))}
+                    </div>
+                    <p className="text-sm text-foreground/75 mt-1">
+                      {review.review.split("\n").map((line, index) => (
+                        <React.Fragment key={index}>
+                          {line}
+                          <br />
+                        </React.Fragment>
+                      ))}
+                    </p>
+                  </>
+                ))}
+            </div>
+          ))}
+
+        {reviews && reviews.total > 10 && (
+          <div className="mt-2">
+            <Pagination
+              total={Math.ceil(reviews?.total / 10)}
+              initialPage={page}
+              onChange={setPage}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

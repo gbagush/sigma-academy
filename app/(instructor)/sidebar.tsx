@@ -45,6 +45,11 @@ const sidebarItems = [
     url: `${baseUrl}/wallet`,
     icon: Wallet,
   },
+  {
+    title: "Voucher",
+    url: `${baseUrl}/voucher`,
+    icon: TicketPercent,
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

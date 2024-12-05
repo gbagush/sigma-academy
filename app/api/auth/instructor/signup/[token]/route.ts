@@ -5,6 +5,7 @@ import { emailNotification } from "@/lib/mail-templates/email-notification";
 import { ObjectId } from "mongodb";
 import { hashPassword } from "@/lib/password";
 import { verifyTokenFromRequest } from "@/lib/jwt";
+import { randomUsername } from "@/lib/nanoid";
 
 export async function POST(
   request: NextRequest,
@@ -65,6 +66,7 @@ export async function POST(
     password: hashedPassword,
     description: data.description,
     socials: data.socials,
+    username: randomUsername(),
     status: "pending",
     createdAt: new Date(),
   });
