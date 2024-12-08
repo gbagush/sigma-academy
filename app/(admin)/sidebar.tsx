@@ -35,11 +35,6 @@ const baseUrl = "/admin/dashboard";
 
 const sidebarItems = [
   {
-    title: "Home",
-    url: `${baseUrl}`,
-    icon: Home,
-  },
-  {
     title: "Users",
     url: `${baseUrl}/users`,
     icon: User,
@@ -50,34 +45,23 @@ const sidebarItems = [
     icon: Presentation,
     items: [
       {
+        title: "Applications",
+        url: `${baseUrl}/instructors/applications`,
+      },
+      {
         title: "Instructors",
         url: `${baseUrl}/instructors`,
       },
       {
-        title: "Applications",
-        url: `${baseUrl}/instructors/applications`,
+        title: "Withdrawal",
+        url: `${baseUrl}/instructors/withdrawal`,
       },
     ],
   },
   {
-    title: "Courses",
-    url: "#",
-    icon: LibraryBig,
-  },
-  {
-    title: "Transactions",
-    url: "#",
-    icon: ArrowLeftRight,
-  },
-  {
     title: "Vouchers",
-    url: "#",
+    url: `${baseUrl}/vouchers`,
     icon: TicketPercent,
-  },
-  {
-    title: "Reports",
-    url: "#",
-    icon: MessageSquareWarning,
   },
 ];
 

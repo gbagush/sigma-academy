@@ -91,16 +91,32 @@ export async function PUT(
     title: section.title,
     createdAt: section.createdAt || new Date(),
     updatedAt: new Date(),
-    contents: section.contents.map((content: any) => ({
-      _id: isValidObjectId(content._id)
-        ? new ObjectId(content._id)
-        : new ObjectId(),
-      title: content.title,
-      url: content.url,
-      description: content.description,
-      preview: content.preview,
-      createdAt: content.createdAt || new Date(),
-    })),
+    contents: section.contents.map((content: any) => {
+      const baseContent = {
+        _id: isValidObjectId(content._id)
+          ? new ObjectId(content._id)
+          : new ObjectId(),
+        title: content.title,
+        createdAt: content.createdAt || new Date(),
+      };
+
+      if (content.type === "quiz") {
+        return {
+          ...baseContent,
+          type: "quiz",
+          quizId: content.quizId,
+          minimumGrade: content.minimumGrade,
+        };
+      }
+
+      return {
+        ...baseContent,
+        type: "content",
+        url: content.url,
+        description: content.description,
+        preview: content.preview,
+      };
+    }),
   }));
 
   try {

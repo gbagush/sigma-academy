@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { verifyTokenFromRequest } from "@/lib/jwt";
 import { xenditInvoiceClient } from "@/lib/xendit";
+import { Balance } from "xendit-node";
 
 export async function GET(
   request: NextRequest,
@@ -70,6 +71,65 @@ export async function GET(
         transactionId: new ObjectId(transactionId),
         enrolledAt: new Date(),
       });
+
+      const instructorWallet = await db
+        .collection("courses")
+        .aggregate([
+          {
+            $match: {
+              _id: new ObjectId(transaction.courseId),
+            },
+          },
+          {
+            $lookup: {
+              from: "wallets",
+              localField: "instructorId",
+              foreignField: "instructorId",
+              as: "wallet",
+            },
+          },
+          {
+            $unwind: "$wallet",
+          },
+        ])
+        .toArray();
+
+      let amount;
+
+      if (
+        transaction.voucherId &&
+        transaction.voucherType &&
+        transaction.voucherDiscount
+      ) {
+        if (transaction.voucherType == "instructor") {
+          amount =
+            transaction.amount -
+            (transaction.amount * transaction.voucherDiscount) / 100;
+        } else {
+          amount = transaction.amount;
+        }
+      } else {
+        amount = transaction.amount;
+      }
+
+      await db.collection("walletTransactions").insertOne({
+        walletId: instructorWallet[0].wallet._id,
+        type: "income",
+        amount: amount,
+        transactionId: transaction._id,
+        description: "Course Sales",
+        status: "success",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      await db.collection("wallets").updateOne(
+        { _id: instructorWallet[0].wallet._id },
+        {
+          $inc: { balance: amount },
+          $set: { updatedAt: new Date() },
+        }
+      );
 
       return NextResponse.json(
         {

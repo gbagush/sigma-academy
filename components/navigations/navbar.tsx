@@ -166,7 +166,7 @@ export const Navbar = () => {
                     <DropdownItem
                       as={Link}
                       key="dashboard"
-                      href={`/admin/dashboard/`}
+                      href={`/admin/dashboard/users`}
                     >
                       Dashboard
                     </DropdownItem>

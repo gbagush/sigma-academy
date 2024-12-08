@@ -16,6 +16,7 @@ import {
   Edit,
   Delete,
   Eye,
+  FileQuestion,
 } from "lucide-react";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import {
@@ -26,28 +27,57 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
+import {
+  Autocomplete,
+  AutocompleteSection,
+  AutocompleteItem,
+} from "@nextui-org/autocomplete";
 import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
 import { Input, Textarea } from "@nextui-org/input";
 import { Checkbox } from "@nextui-org/checkbox";
 import { toast } from "@/hooks/use-toast";
 
+interface AddContentParams {
+  sectionId: string;
+  title: string;
+  url?: string;
+  description?: string;
+  preview?: boolean;
+  quizId?: string;
+  minimumGrade?: number;
+  type: "content" | "quiz";
+}
+
+interface Content {
+  _id: string;
+  title: string;
+  url: string;
+  description: string;
+  preview: boolean;
+  type: "content";
+}
+
+interface Quiz {
+  _id: string;
+  title: string;
+  quizId: string;
+  minimumGrade: number;
+  type: "quiz";
+}
+
+type SectionContent = Content | Quiz;
+
+interface Section {
+  _id: string;
+  title: string;
+  contents: SectionContent[];
+}
+
 export default function CourseContentTabs({ id }: { id: string }) {
   const addSectionModal = useDisclosure();
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
 
-  const [sections, setSections] = useState<
-    {
-      _id: string;
-      title: string;
-      contents: {
-        _id: string;
-        title: string;
-        url: string;
-        description: string;
-        preview: boolean;
-      }[];
-    }[]
-  >([]);
+  const [sections, setSections] = useState<Section[]>([]);
 
   const editSectionModal = useDisclosure();
   const [editSectionId, setEditSectionId] = useState<string | null>(null);
@@ -60,16 +90,30 @@ export default function CourseContentTabs({ id }: { id: string }) {
   const addContentModal = useDisclosure();
 
   const editContentModal = useDisclosure();
+
   const [editContentId, setEditContentId] = useState<string | null>(null);
+  const [editContentType, setEditContentType] = useState<"content" | "quiz">(
+    "content"
+  );
+
   const [editContentTitle, setEditContentTitle] = useState("");
+
   const [editContentUrl, setEditContentUrl] = useState("");
   const [editContentDescription, setEditContentDescription] = useState("");
   const [editContentPreview, setEditContentPreview] = useState(false);
+
+  const [editQuizTitle, setEditQuizTitle] = useState("");
+  const [editQuizId, setEditQuizId] = useState("");
+  const [editQuizMinimumGrade, setEditQuizMinimumGrade] = useState(0);
 
   const deleteContentModal = useDisclosure();
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
   const [deleteContentTitle, setDeleteContentTitle] = useState<string>("");
   const [confirmContentTitle, setConfirmContentTitle] = useState<string>("");
+
+  useEffect(() => {
+    console.log(sections);
+  }, [sections]);
 
   const handleAddSection = (title: string): void => {
     const newSection = {
@@ -139,36 +183,63 @@ export default function CourseContentTabs({ id }: { id: string }) {
     });
   };
 
-  const addContentToSection = (
-    sectionId: string,
-    title: string,
-    url: string,
-    description: string,
-    preview: boolean
-  ) => {
-    setSections((prevSections) => {
+  const addContentToSection = ({
+    sectionId,
+    title,
+    url,
+    description,
+    preview,
+    quizId,
+    minimumGrade,
+    type,
+  }: {
+    sectionId: string;
+    title: string;
+    url?: string;
+    description?: string;
+    preview?: boolean;
+    quizId?: string;
+    minimumGrade?: number;
+    type: "content" | "quiz";
+  }) => {
+    setSections((prevSections: any) => {
       const sectionIndex = prevSections.findIndex(
-        (section) => section._id === sectionId
+        (section: any) => section._id === sectionId
       );
+
       if (sectionIndex !== -1) {
+        const newContent =
+          type === "quiz"
+            ? { _id: Date.now().toString(), title, quizId, minimumGrade, type }
+            : {
+                _id: Date.now().toString(),
+                title,
+                url,
+                description,
+                preview,
+                type,
+              };
+
         const updatedContents = [
           ...prevSections[sectionIndex].contents,
-          { _id: Date.now().toString(), title, url, description, preview },
+          newContent,
         ];
+
         const updatedSection = {
           ...prevSections[sectionIndex],
           contents: updatedContents,
         };
+
         return [
           ...prevSections.slice(0, sectionIndex),
           updatedSection,
           ...prevSections.slice(sectionIndex + 1),
         ];
       }
+
       return prevSections;
     });
   };
-
   const handleMoveContentUp = (sectionId: string, index: number) => {
     setSections((prevSections) => {
       const sectionIndex = prevSections.findIndex(
@@ -419,13 +490,17 @@ export default function CourseContentTabs({ id }: { id: string }) {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center">
                           <div className="flex items-center justify-center w-8 h-8 bg-foreground/25 rounded-md mr-4">
-                            <TvMinimalPlay size={16} />
+                            {content.type === "quiz" ? (
+                              <FileQuestion size={16} />
+                            ) : (
+                              <TvMinimalPlay size={16} />
+                            )}
                           </div>
                           <h4 className="text-sm">{content.title}</h4>
                         </div>
                         <div>
                           <div className="flex gap-2 items-center">
-                            {content.preview && (
+                            {content.type === "content" && content.preview && (
                               <Eye size={20} className="text-foreground/75" />
                             )}
                             <ButtonGroup>
@@ -454,9 +529,21 @@ export default function CourseContentTabs({ id }: { id: string }) {
                               onPress={() => {
                                 setEditContentId(content._id);
                                 setEditContentTitle(content.title);
-                                setEditContentUrl(content.url);
-                                setEditContentDescription(content.description);
-                                setEditContentPreview(content.preview);
+
+                                if (content.type === "content") {
+                                  setEditContentType("content");
+                                  setEditContentUrl(content.url);
+                                  setEditContentDescription(
+                                    content.description
+                                  );
+                                  setEditContentPreview(content.preview);
+                                } else {
+                                  setEditContentType("quiz");
+                                  setEditQuizId(content.quizId);
+                                  setEditQuizTitle(content.title);
+                                  setEditQuizMinimumGrade(content.minimumGrade);
+                                }
+
                                 setCurrentSectionId(section._id);
                                 editContentModal.onOpen();
                               }}
@@ -520,10 +607,13 @@ export default function CourseContentTabs({ id }: { id: string }) {
         onOpenChange={editContentModal.onOpenChange}
         onEditContent={handleEditContent}
         contentId={editContentId!}
+        contentType={editContentType}
         title={editContentTitle}
         url={editContentUrl}
         description={editContentDescription}
         preview={editContentPreview}
+        quizId={editQuizId}
+        quizMinimumGrade={editQuizMinimumGrade}
       />
 
       <DeleteContentModal
@@ -678,13 +768,7 @@ const AddContentModal = ({
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddContent: (
-    sectionId: string,
-    title: string,
-    url: string,
-    description: string,
-    preview: boolean
-  ) => void;
+  onAddContent: (params: AddContentParams) => void;
   sectionId: string;
 }) => {
   const [contentTitle, setContentTitle] = useState("");
@@ -692,27 +776,52 @@ const AddContentModal = ({
   const [description, setDescription] = useState("");
   const [preview, setPreview] = useState(false);
 
+  const [contentType, setContentType] = useState<"content" | "quiz">("content");
+
+  const [quizId, setQuizId] = useState("");
+  const [minimumGrade, setMinimumGrade] = useState(0);
+
   const handleSubmit = () => {
-    console.log(
-      "Submit Data:",
-      sectionId,
-      contentTitle,
-      videoUrl,
-      description,
-      preview
-    );
-    if (contentTitle.trim() && videoUrl.trim()) {
-      onAddContent(sectionId, contentTitle, videoUrl, description, preview);
-      setContentTitle("");
-      setVideoUrl("");
-      setDescription("");
-      onOpenChange(false);
+    if (contentType === "content") {
+      if (contentTitle.trim() && videoUrl.trim()) {
+        onAddContent({
+          sectionId,
+          title: contentTitle,
+          url: videoUrl,
+          description,
+          preview,
+          type: "content",
+        });
+      }
+    } else if (contentType === "quiz") {
+      if (
+        contentTitle.trim() &&
+        quizId.trim() &&
+        minimumGrade >= 0 &&
+        minimumGrade <= 100
+      ) {
+        onAddContent({
+          sectionId,
+          title: contentTitle,
+          quizId,
+          minimumGrade,
+          type: "quiz",
+        });
+      }
     }
+    resetFields();
+    onOpenChange(false);
   };
 
-  useEffect(() => {
-    console.log(preview);
-  }, [preview]);
+  const resetFields = () => {
+    setContentTitle("");
+    setVideoUrl("");
+    setDescription("");
+    setPreview(false);
+    setQuizId("");
+    setMinimumGrade(0);
+    setContentType("content");
+  };
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -723,28 +832,64 @@ const AddContentModal = ({
               Add Content
             </ModalHeader>
             <ModalBody>
-              <Input
-                label="Content Title"
-                value={contentTitle}
-                onChange={(e) => setContentTitle(e.target.value)}
-              />
-              <Input
-                label="Video URL"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-              />
-              <Textarea
-                label="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <Checkbox isSelected={preview} onValueChange={setPreview}>
-                Preview content
-              </Checkbox>
+              <Autocomplete
+                selectedKey={contentType}
+                label="Content Type"
+                onSelectionChange={(value) =>
+                  setContentType(value as "content" | "quiz")
+                }
+              >
+                <AutocompleteItem key="content">Content</AutocompleteItem>
+                <AutocompleteItem key="quiz">Quiz</AutocompleteItem>
+              </Autocomplete>
+
+              {contentType === "content" ? (
+                <>
+                  <Input
+                    label="Content Title"
+                    value={contentTitle}
+                    onChange={(e) => setContentTitle(e.target.value)}
+                  />
+                  <Input
+                    label="Video URL"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                  />
+                  <Textarea
+                    label="Description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                  <Checkbox isSelected={preview} onValueChange={setPreview}>
+                    {" "}
+                    Preview content{" "}
+                  </Checkbox>
+                </>
+              ) : (
+                <>
+                  <Input
+                    label="Quiz Title"
+                    value={contentTitle}
+                    onChange={(e) => setContentTitle(e.target.value)}
+                  />
+                  <Input
+                    label="Quiz ID"
+                    value={quizId}
+                    onChange={(e) => setQuizId(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    label="Minimum Grade (0-100)"
+                    value={minimumGrade.toString()}
+                    onChange={(e) => setMinimumGrade(Number(e.target.value))}
+                  />
+                </>
+              )}
             </ModalBody>
             <ModalFooter>
               <Button color="primary" onPress={handleSubmit}>
-                Add Content
+                {" "}
+                Add {contentType === "quiz" ? "Quiz" : "Content"}{" "}
               </Button>
             </ModalFooter>
           </>
@@ -759,10 +904,13 @@ const EditContentModal = ({
   onOpenChange,
   onEditContent,
   contentId,
+  contentType,
   title,
   url,
   description,
   preview,
+  quizId,
+  quizMinimumGrade,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -774,23 +922,34 @@ const EditContentModal = ({
     preview: boolean
   ) => void;
   contentId: string | null;
+  contentType: "content" | "quiz";
   title: string;
   url: string;
   description: string;
   preview: boolean;
+  quizId: string;
+  quizMinimumGrade: number;
 }) => {
   const [editTitle, setEditTitle] = useState(title);
   const [editUrl, setEditUrl] = useState(url);
   const [editDescription, setEditDescription] = useState(description);
   const [editPreview, setEditPreview] = useState(preview);
 
+  const [editQuizId, setEditQuizId] = useState("");
+  const [editQuizMinimumGrade, setEditQuizMinimumGrade] =
+    useState(quizMinimumGrade);
+
   useEffect(() => {
-    console.log(preview);
     setEditTitle(title);
     setEditUrl(url);
     setEditDescription(description);
     setEditPreview(preview);
-  }, [title, url, description, preview]);
+
+    if (contentType === "quiz") {
+      setEditQuizId(quizId);
+      setEditQuizMinimumGrade(quizMinimumGrade);
+    }
+  }, [title, url, description, preview, quizId, quizMinimumGrade, contentType]);
 
   const handleSubmit = () => {
     if (editTitle.trim() && editUrl.trim()) {
@@ -816,27 +975,52 @@ const EditContentModal = ({
           <>
             <ModalHeader>Edit Content</ModalHeader>
             <ModalBody>
-              <Input
-                label="Content Title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
-              <Input
-                label="Video URL"
-                value={editUrl}
-                onChange={(e) => setEditUrl(e.target.value)}
-              />
-              <Textarea
-                label="Description"
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-              />
-              <Checkbox
-                isSelected={editPreview}
-                onChange={(e) => setEditPreview(e.target.checked)}
-              >
-                Preview content
-              </Checkbox>
+              {contentType == "content" ? (
+                <>
+                  <Input
+                    label="Content Title"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <Input
+                    label="Video URL"
+                    value={editUrl}
+                    onChange={(e) => setEditUrl(e.target.value)}
+                  />
+                  <Textarea
+                    label="Description"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                  />
+                  <Checkbox
+                    isSelected={editPreview}
+                    onChange={(e) => setEditPreview(e.target.checked)}
+                  >
+                    Preview content
+                  </Checkbox>
+                </>
+              ) : (
+                <>
+                  <Input
+                    label="Quiz Title"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <Input
+                    label="Quiz ID"
+                    value={editQuizId}
+                    onChange={(e) => setEditQuizId(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    label="Minimum Grade (0-100)"
+                    value={editQuizMinimumGrade.toString()}
+                    onChange={(e) =>
+                      setEditQuizMinimumGrade(parseInt(e.target.value))
+                    }
+                  />
+                </>
+              )}
             </ModalBody>
             <ModalFooter>
               <Button color="primary" onPress={handleSubmit}>

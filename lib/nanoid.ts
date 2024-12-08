@@ -8,3 +8,9 @@ export const randomUsername = () => {
 
   return nanoid();
 };
+
+export const randomOTP = () => {
+  const nanoid = customAlphabet("123456789", 6);
+
+  return nanoid();
+};

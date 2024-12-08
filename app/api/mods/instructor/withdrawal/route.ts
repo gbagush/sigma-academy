@@ -1,6 +1,10 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTokenFromRequest } from "@/lib/jwt";
+import { sendEmail } from "@/lib/mailer";
+import { emailNotification } from "@/lib/mail-templates/email-notification";
+import { emailConfirm } from "@/lib/mail-templates/email-confirm";
+
 import { ObjectId } from "mongodb";
 
 export async function GET(request: NextRequest) {
@@ -20,58 +24,37 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  const email = searchParams.get("email");
-  const firstName = searchParams.get("firstName");
-  const lastName = searchParams.get("lastName");
-  const username = searchParams.get("username");
-
+  const status = searchParams.get("status");
   const page = parseInt(searchParams.get("page") || "0", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
   const sortOrder = searchParams.get("sort") || "newest";
 
-  if (limit > 100) {
-    return NextResponse.json({ error: "Limit to big" }, { status: 400 });
-  }
-
   try {
     const query: { [key: string]: any } = {};
 
-    if (id) {
-      query._id = new ObjectId(id);
-    }
-
-    if (email) {
-      query.email = email.toLowerCase();
-    }
-
-    if (firstName && lastName) {
-      query.firstName = firstName;
-      query.lastName = lastName;
-    } else {
-      if (firstName) {
-        query.firstName = firstName;
-      }
-      if (lastName) {
-        query.lastName = lastName;
-      }
-    }
-
-    if (username) {
-      query.username = username;
+    if (status == "pending") {
+      query.status = "pending";
+    } else if (status == "success") {
+      query.status = "success";
+    } else if (status == "failed") {
+      query.status = "failed";
     }
 
     const sort: { [key: string]: 1 | -1 } = {};
     if (sortOrder === "oldest") {
-      sort.registerAt = 1;
+      sort.createdAt = 1;
     } else {
-      sort.registerAt = -1;
+      sort.createdAt = -1;
     }
 
-    const totalCount = await db.collection("users").countDocuments(query);
+    query.type = "outcome";
 
-    const users = await db
-      .collection("users")
+    const totalCount = await db
+      .collection("walletTransactions")
+      .countDocuments(query);
+
+    const withdrawals = await db
+      .collection("walletTransactions")
       .find(query)
       .sort(sort)
       .skip(page * limit)
@@ -79,16 +62,17 @@ export async function GET(request: NextRequest) {
       .toArray();
 
     return NextResponse.json({
-      success: true,
-      data: users,
-      totalCount,
-      page,
-      limit,
+      message: "Success getting withdrawals",
+      data: {
+        totalCount,
+        page,
+        limit,
+        withdrawals: withdrawals,
+      },
     });
   } catch (error) {
-    console.error("Database error:", error);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }

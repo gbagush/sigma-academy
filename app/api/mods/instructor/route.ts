@@ -10,6 +10,15 @@ export async function GET(request: NextRequest) {
     return verificationResult;
   }
 
+  if (verificationResult.decoded.role !== "admin") {
+    return NextResponse.json(
+      { message: "Forbidden" },
+      {
+        status: 403,
+      }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const email = searchParams.get("email");

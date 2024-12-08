@@ -13,6 +13,7 @@ import {
   TicketPercent,
   MessageSquareWarning,
   Wallet,
+  FileQuestion,
 } from "lucide-react";
 
 import { NavUser } from "@/components/navigations/sidebar/sidebar-user";
@@ -41,14 +42,19 @@ const sidebarItems = [
     icon: LibraryBig,
   },
   {
-    title: "Wallet",
-    url: `${baseUrl}/wallet`,
-    icon: Wallet,
+    title: "Quiz",
+    url: `${baseUrl}/quiz`,
+    icon: FileQuestion,
   },
   {
     title: "Voucher",
     url: `${baseUrl}/voucher`,
     icon: TicketPercent,
+  },
+  {
+    title: "Wallet",
+    url: `${baseUrl}/wallet`,
+    icon: Wallet,
   },
 ];
 

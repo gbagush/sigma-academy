@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (voucher.type == "instructor") {
-        if (voucher.creatorId !== course.instructorId) {
+        if (voucher.creatorId.toString() != course.instructorId.toString()) {
           return NextResponse.json(
             { message: "Cant use voucher for this transaction" },
             { status: 400 }
@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
         amount: parseFloat(course.discountedPrice),
         tax: taxRate,
         voucherId: new ObjectId(data.voucherId),
+        voucherType: voucher.type,
         voucherDiscount: voucher.discount,
       });
     } else {

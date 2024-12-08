@@ -13,6 +13,15 @@ export async function PUT(
     return verificationResult;
   }
 
+  if (verificationResult.decoded.role !== "admin") {
+    return NextResponse.json(
+      { message: "Forbidden" },
+      {
+        status: 403,
+      }
+    );
+  }
+
   let voucherId;
   try {
     voucherId = new ObjectId(params.id);
@@ -78,6 +87,15 @@ export async function DELETE(
 
   if (verificationResult instanceof NextResponse) {
     return verificationResult;
+  }
+
+  if (verificationResult.decoded.role !== "admin") {
+    return NextResponse.json(
+      { message: "Forbidden" },
+      {
+        status: 403,
+      }
+    );
   }
 
   let voucherId;

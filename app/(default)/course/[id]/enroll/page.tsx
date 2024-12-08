@@ -133,7 +133,15 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
         setVoucherData(result.data.data);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          return;
+          setVoucherStatus({
+            isLoaded: true,
+            isValid: false,
+            reason: error.response?.data.message,
+          });
+          toast({
+            title: "Error apply voucher",
+            description: error.response?.data.message,
+          });
         } else {
           toast({
             title: "Error apply voucher",
@@ -151,7 +159,7 @@ export default function CourseEnroll({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (voucherData) {
       if (voucherData.type == "instructor") {
-        if (voucherData.createdAt == course?.instructorId) {
+        if (voucherData.creatorId == course?.instructorDetails[0]._id) {
           setVoucherStatus({
             isValid: true,
             isLoaded: true,
