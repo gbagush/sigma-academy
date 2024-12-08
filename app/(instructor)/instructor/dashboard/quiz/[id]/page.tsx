@@ -136,7 +136,7 @@ export default function CreateQuizDashboard({
 
   return (
     <div>
-      <h1 className="text-2xl my-4">Create Quiz</h1>
+      <h1 className="text-2xl my-4">Edit Quiz</h1>
       <div className="flex justify-between gap-4">
         <Input
           placeholder="Title"

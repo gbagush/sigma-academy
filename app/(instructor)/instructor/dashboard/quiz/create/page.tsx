@@ -7,6 +7,7 @@ import { Button } from "@nextui-org/button";
 import { Plus, Save, Trash, X } from "lucide-react";
 import { Checkbox } from "@nextui-org/checkbox";
 import { Divider } from "@nextui-org/divider";
+import { useToast } from "@/hooks/use-toast";
 
 interface Answer {
   _id: string;
@@ -30,15 +31,35 @@ export default function CreateQuizDashboard() {
     },
   ]);
 
+  const { toast } = useToast();
+
   const handleSave = async () => {
     try {
       const response = await axios.post("/api/instructor/quiz", {
         title: title,
         questions,
       });
-      console.log(response.data);
+
+      toast({
+        title: "Quiz Created Successfully",
+        description: "You will be redirected to the quiz editor after this",
+      });
+
+      setTimeout(() => {
+        window.location.href = `/instructor/dashboard/quiz/${response.data.data}`;
+      }, 2000);
     } catch (error) {
-      console.error(error);
+      if (axios.isAxiosError(error)) {
+        toast({
+          title: "Failed Create Quiz",
+          description: error.response?.data.message || "An error occurred.",
+        });
+      } else {
+        toast({
+          title: "Failed Create Quiz",
+          description: "Network error. Please try again.",
+        });
+      }
     }
   };
 

@@ -21,6 +21,17 @@ export async function POST(
   }
 
   try {
+    const wallet = await db.collection("wallets").findOne({
+      instructorId: new ObjectId(verificationResult.decoded.userId),
+    });
+
+    if (!wallet) {
+      return NextResponse.json(
+        { message: "Create wallet first" },
+        { status: 400 }
+      );
+    }
+
     const course = await db.collection("courses").findOne({
       _id: courseId,
       instructorId: new ObjectId(verificationResult.decoded.userId),

@@ -72,12 +72,20 @@ interface Section {
   title: string;
   contents: SectionContent[];
 }
+interface QuizData {
+  _id: string;
+  instructorId: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function CourseContentTabs({ id }: { id: string }) {
   const addSectionModal = useDisclosure();
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
 
   const [sections, setSections] = useState<Section[]>([]);
+  const [quizzes, setQuizzes] = useState<QuizData[]>([]);
 
   const editSectionModal = useDisclosure();
   const [editSectionId, setEditSectionId] = useState<string | null>(null);
@@ -109,7 +117,6 @@ export default function CourseContentTabs({ id }: { id: string }) {
   const deleteContentModal = useDisclosure();
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
   const [deleteContentTitle, setDeleteContentTitle] = useState<string>("");
-  const [confirmContentTitle, setConfirmContentTitle] = useState<string>("");
 
   useEffect(() => {
     console.log(sections);
@@ -298,26 +305,37 @@ export default function CourseContentTabs({ id }: { id: string }) {
     title: string,
     url: string,
     description: string,
-    preview: boolean
+    preview: boolean,
+    type: "content" | "quiz",
+    quizId?: string,
+    minimumGrade?: number
   ) => {
-    console.log("Try edit data");
-    console.log("Editing Content ID:", contentId);
-    console.log("New Data:", { title, url, description, preview });
-    console.log("Current Section ID:", currentSectionId);
-
-    setSections((prevSections) => {
-      console.log("Previous Sections:", prevSections);
-
+    setSections((prevSections: any) => {
       const sectionIndex = prevSections.findIndex(
-        (section) => section._id === currentSectionId
+        (section: any) => section._id === currentSectionId
       );
 
       if (sectionIndex !== -1) {
         const updatedContents = prevSections[sectionIndex].contents.map(
-          (content) => {
+          (content: any) => {
             if (content._id === contentId) {
-              console.log("Updating Content:", content);
-              return { ...content, title, url, description, preview };
+              if (type === "quiz") {
+                return {
+                  ...content,
+                  title,
+                  quizId,
+                  minimumGrade,
+                  type,
+                };
+              }
+              return {
+                ...content,
+                title,
+                url,
+                description,
+                preview,
+                type,
+              };
             }
             return content;
           }
@@ -328,17 +346,12 @@ export default function CourseContentTabs({ id }: { id: string }) {
           contents: updatedContents,
         };
 
-        const updatedSections = [
+        return [
           ...prevSections.slice(0, sectionIndex),
           updatedSection,
           ...prevSections.slice(sectionIndex + 1),
         ];
-
-        console.log("Updated Sections:", updatedSections);
-        return updatedSections;
       }
-
-      console.log("Section not found for ID:", currentSectionId);
       return prevSections;
     });
   };
@@ -404,7 +417,28 @@ export default function CourseContentTabs({ id }: { id: string }) {
       }
     };
 
+    const fetchQuizzes = async () => {
+      try {
+        const response = await axios.get("/api/instructor/quiz");
+        setQuizzes(response.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast({
+            title: "Failed to fetch quiz",
+            description:
+              error.response?.data.message || "An unknown error occurred.",
+          });
+        } else {
+          toast({
+            title: "Failed to fetch quiz",
+            description: "Network error, please try again later",
+          });
+        }
+      }
+    };
+
     getSectionData();
+    fetchQuizzes();
   }, []);
 
   return (
@@ -600,6 +634,7 @@ export default function CourseContentTabs({ id }: { id: string }) {
         onOpenChange={addContentModal.onOpenChange}
         onAddContent={addContentToSection}
         sectionId={currentSectionId!}
+        quizzes={quizzes}
       />
 
       <EditContentModal
@@ -614,6 +649,7 @@ export default function CourseContentTabs({ id }: { id: string }) {
         preview={editContentPreview}
         quizId={editQuizId}
         quizMinimumGrade={editQuizMinimumGrade}
+        quizzes={quizzes}
       />
 
       <DeleteContentModal
@@ -765,11 +801,13 @@ const AddContentModal = ({
   onOpenChange,
   onAddContent,
   sectionId,
+  quizzes,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAddContent: (params: AddContentParams) => void;
   sectionId: string;
+  quizzes: QuizData[];
 }) => {
   const [contentTitle, setContentTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -867,16 +905,26 @@ const AddContentModal = ({
                 </>
               ) : (
                 <>
-                  <Input
-                    label="Quiz Title"
-                    value={contentTitle}
-                    onChange={(e) => setContentTitle(e.target.value)}
-                  />
-                  <Input
-                    label="Quiz ID"
-                    value={quizId}
-                    onChange={(e) => setQuizId(e.target.value)}
-                  />
+                  <Autocomplete
+                    label="Select Quiz"
+                    onSelectionChange={(value) => {
+                      if (value !== null) {
+                        setQuizId(value as string);
+                        const selectedQuiz = quizzes.find(
+                          (quiz) => quiz._id === value
+                        );
+                        if (selectedQuiz) {
+                          setContentTitle(selectedQuiz.title);
+                        }
+                      }
+                    }}
+                  >
+                    {quizzes.map((quiz) => (
+                      <AutocompleteItem key={quiz._id}>
+                        {quiz.title}
+                      </AutocompleteItem>
+                    ))}
+                  </Autocomplete>
                   <Input
                     type="number"
                     label="Minimum Grade (0-100)"
@@ -911,6 +959,7 @@ const EditContentModal = ({
   preview,
   quizId,
   quizMinimumGrade,
+  quizzes,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -919,7 +968,10 @@ const EditContentModal = ({
     title: string,
     url: string,
     description: string,
-    preview: boolean
+    preview: boolean,
+    type: "content" | "quiz",
+    quizId?: string,
+    minimumGrade?: number
   ) => void;
   contentId: string | null;
   contentType: "content" | "quiz";
@@ -929,13 +981,13 @@ const EditContentModal = ({
   preview: boolean;
   quizId: string;
   quizMinimumGrade: number;
+  quizzes: QuizData[];
 }) => {
   const [editTitle, setEditTitle] = useState(title);
   const [editUrl, setEditUrl] = useState(url);
   const [editDescription, setEditDescription] = useState(description);
   const [editPreview, setEditPreview] = useState(preview);
-
-  const [editQuizId, setEditQuizId] = useState("");
+  const [editQuizId, setEditQuizId] = useState(quizId);
   const [editQuizMinimumGrade, setEditQuizMinimumGrade] =
     useState(quizMinimumGrade);
 
@@ -944,38 +996,50 @@ const EditContentModal = ({
     setEditUrl(url);
     setEditDescription(description);
     setEditPreview(preview);
-
-    if (contentType === "quiz") {
-      setEditQuizId(quizId);
-      setEditQuizMinimumGrade(quizMinimumGrade);
-    }
-  }, [title, url, description, preview, quizId, quizMinimumGrade, contentType]);
+    setEditQuizId(quizId);
+    setEditQuizMinimumGrade(quizMinimumGrade);
+  }, [title, url, description, preview, quizId, quizMinimumGrade]);
 
   const handleSubmit = () => {
-    if (editTitle.trim() && editUrl.trim()) {
-      onEditContent(
-        contentId!,
-        editTitle,
-        editUrl,
-        editDescription,
-        editPreview
-      );
-      onOpenChange(false);
+    if (contentType === "content") {
+      if (editTitle.trim() && editUrl.trim()) {
+        onEditContent(
+          contentId!,
+          editTitle,
+          editUrl,
+          editDescription,
+          editPreview,
+          "content"
+        );
+        onOpenChange(false);
+      }
+    } else {
+      if (editTitle.trim() && editQuizId.trim()) {
+        onEditContent(
+          contentId!,
+          editTitle,
+          "",
+          "",
+          false,
+          "quiz",
+          editQuizId,
+          editQuizMinimumGrade
+        );
+        onOpenChange(false);
+      }
     }
   };
-
-  useEffect(() => {
-    console.log(preview);
-  }, [preview]);
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>Edit Content</ModalHeader>
+            <ModalHeader>
+              Edit {contentType === "quiz" ? "Quiz" : "Content"}
+            </ModalHeader>
             <ModalBody>
-              {contentType == "content" ? (
+              {contentType === "content" ? (
                 <>
                   <Input
                     label="Content Title"
@@ -1001,6 +1065,26 @@ const EditContentModal = ({
                 </>
               ) : (
                 <>
+                  <Autocomplete
+                    label="Select Quiz"
+                    onSelectionChange={(value) => {
+                      if (value !== null) {
+                        setEditQuizId(value as string);
+                        const selectedQuiz = quizzes.find(
+                          (quiz) => quiz._id === value
+                        );
+                        if (selectedQuiz) {
+                          setEditTitle(selectedQuiz.title);
+                        }
+                      }
+                    }}
+                  >
+                    {quizzes.map((quiz) => (
+                      <AutocompleteItem key={quiz._id}>
+                        {quiz.title}
+                      </AutocompleteItem>
+                    ))}
+                  </Autocomplete>
                   <Input
                     label="Quiz Title"
                     value={editTitle}
@@ -1024,7 +1108,7 @@ const EditContentModal = ({
             </ModalBody>
             <ModalFooter>
               <Button color="primary" onPress={handleSubmit}>
-                Update Content
+                Update {contentType === "quiz" ? "Quiz" : "Content"}
               </Button>
             </ModalFooter>
           </>

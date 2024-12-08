@@ -13,6 +13,7 @@ import {
   Check,
   Dot,
   Eye,
+  FileQuestion,
   Globe,
   MessageSquare,
   RefreshCcw,
@@ -61,9 +62,12 @@ interface Section {
 interface Content {
   _id: string;
   title: string;
+  type: "content" | "quiz";
   url?: string;
   description?: string;
-  preview: boolean;
+  preview?: boolean;
+  quizId?: string;
+  minimumGrade?: number;
 }
 
 interface CategoryDetails {
@@ -106,6 +110,20 @@ export interface UserDetails {
   profilePicture: string;
 }
 
+export interface Enrollment {
+  _id: string;
+  userId: string;
+  courseId: string;
+  transactionId: string;
+  enrolledAt: string;
+  progress?: Progress[];
+}
+
+export interface Progress {
+  contentId: string;
+  doneAt: string;
+}
+
 const formatCurrency = (amount: string) => {
   const number = parseFloat(amount);
   return `Rp${new Intl.NumberFormat("id-ID", {
@@ -119,8 +137,35 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<Content>();
+  const [enrollment, setEnrollment] = useState<Enrollment>();
 
   const { role, status } = useAuth();
+
+  const { toast } = useToast();
+
+  const fetchEnrollment = async () => {
+    if (course?.enrollmentId) {
+      try {
+        const response = await axios.get(
+          `/api/enrollment/${course.enrollmentId}`
+        );
+
+        setEnrollment(response.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast({
+            title: "Failed getting enrollment data",
+            description: error.response?.data.message || "An error occurred.",
+          });
+        } else {
+          toast({
+            title: "Failed getting enrollment data",
+            description: "Network error. Please try again.",
+          });
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -136,6 +181,41 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
 
     fetchCourse();
   }, [params.id]);
+
+  useEffect(() => {
+    fetchEnrollment();
+  }, [course]);
+
+  const handleComplete = async (contentId: string) => {
+    try {
+      const result = await axios.post(`/api/course/${params.id}/${contentId}`);
+
+      toast({
+        title: "Progress saved successfully",
+        description: result.data.message,
+      });
+
+      fetchEnrollment();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast({
+          title: "Failed save progress",
+          description: error.response?.data.message || "An error occurred.",
+        });
+      } else {
+        toast({
+          title: "Failed save progress",
+          description: "Network error. Please try again.",
+        });
+      }
+    }
+  };
+
+  const isContentCompleted = (contentId: string) => {
+    return enrollment?.progress?.some(
+      (progress) => progress.contentId === contentId
+    );
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -233,7 +313,12 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
                 className="w-full rounded-md"
               />
             ) : (
-              <ReactPlayer url={selectedContent.url} width="100%" controls />
+              <ReactPlayer
+                url={selectedContent.url}
+                width="100%"
+                controls
+                onEnded={async () => handleComplete(selectedContent._id)}
+              />
             )}
           </div>
           <div className="py-4 w-full md:w-2/5 md:p-4 ">
@@ -246,31 +331,62 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
                   className="mb-2"
                 >
                   <div className="flex flex-col gap-2">
-                    {section.contents.map((content, index) => (
-                      <button
-                        className={`w-full flex justify-between items-center ${
-                          content.url
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed text-foreground/50"
-                        }`}
-                        key={index}
-                        onClick={() => {
-                          if (content.url) {
-                            setSelectedContent(content);
+                    {section.contents.map((content, index) =>
+                      content.type === "quiz" ? (
+                        <Link
+                          className={`w-full flex justify-between items-center ${
+                            content.quizId
+                              ? "cursor-pointer"
+                              : "cursor-not-allowed text-foreground/50"
+                          }`}
+                          key={index}
+                          href={
+                            content.quizId
+                              ? `/course/${params.id}/quiz/${content._id}`
+                              : "#"
                           }
-                        }}
-                        disabled={!content.url}
-                        type="button"
-                      >
-                        <div className="flex gap-2 items-center overflow-hidden whitespace-nowrap">
-                          <TvMinimalPlay size={16} />
-                          <span className="truncate">{content.title}</span>
-                        </div>
-                        <div className="flex items-center">
-                          {content.preview && <Eye size={16} />}
-                        </div>
-                      </button>
-                    ))}
+                          type="button"
+                        >
+                          <div className="flex gap-2 items-center overflow-hidden whitespace-nowrap">
+                            <FileQuestion size={16} />
+                            <span className="truncate">{content.title}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isContentCompleted(content._id) && (
+                              <Check size={16} />
+                            )}
+                            {content.preview && <Eye size={16} />}
+                          </div>
+                        </Link>
+                      ) : (
+                        <button
+                          className={`w-full flex justify-between items-center ${
+                            content.url
+                              ? "cursor-pointer"
+                              : "cursor-not-allowed text-foreground/50"
+                          }`}
+                          key={index}
+                          onClick={() => {
+                            if (content.url) {
+                              setSelectedContent(content);
+                            }
+                          }}
+                          disabled={!content.url}
+                          type="button"
+                        >
+                          <div className="flex gap-2 items-center overflow-hidden whitespace-nowrap">
+                            <TvMinimalPlay size={16} />
+                            <span className="truncate">{content.title}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isContentCompleted(content._id) && (
+                              <Check size={16} />
+                            )}
+                            {content.preview && <Eye size={16} />}
+                          </div>
+                        </button>
+                      )
+                    )}
                   </div>
                 </AccordionItem>
               ))}

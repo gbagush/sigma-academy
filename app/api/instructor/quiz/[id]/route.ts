@@ -140,3 +140,46 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const verificationResult = await verifyTokenFromRequest(request);
+
+  if (verificationResult instanceof NextResponse) {
+    return verificationResult;
+  }
+
+  if (verificationResult.decoded.role !== "instructor") {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+  let quizId;
+  try {
+    quizId = new ObjectId(params.id);
+  } catch (error) {
+    return NextResponse.json({ message: "Invalid id format" }, { status: 400 });
+  }
+
+  try {
+    const result = await db.collection("quizzes").deleteOne({
+      _id: quizId,
+      instructorId: new ObjectId(verificationResult.decoded.userId),
+    });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "Quiz not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "Success delete quiz" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

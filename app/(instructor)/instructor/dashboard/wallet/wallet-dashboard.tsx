@@ -330,6 +330,19 @@ export default function WalletDashboard() {
                         {transaction.description}
                       </span>
                       <div className="flex w-full items-center gap-2 justify-end">
+                        <span className="text-sm text-foreground/75">
+                          {new Date(transaction.createdAt).toLocaleString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "numeric",
+                              hour12: false,
+                            }
+                          )}
+                        </span>
                         {transaction.status == "success" && (
                           <Chip size="sm" color="success" variant="flat">
                             Success
@@ -345,19 +358,6 @@ export default function WalletDashboard() {
                             Failed
                           </Chip>
                         )}
-                        <span className="text-sm text-foreground/75">
-                          {new Date(transaction.createdAt).toLocaleString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "numeric",
-                              hour12: false,
-                            }
-                          )}
-                        </span>
                       </div>
                     </div>
                   </CardBody>
@@ -378,6 +378,19 @@ export default function WalletDashboard() {
                         {transaction.description}
                       </span>
                       <div className="flex w-full items-center gap-2 justify-end">
+                        <span className="text-sm text-foreground/75">
+                          {new Date(transaction.createdAt).toLocaleString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "numeric",
+                              hour12: false,
+                            }
+                          )}
+                        </span>
                         {transaction.status == "success" && (
                           <Chip size="sm" color="success" variant="flat">
                             Success
@@ -393,19 +406,6 @@ export default function WalletDashboard() {
                             Failed
                           </Chip>
                         )}
-                        <span className="text-sm text-foreground/75">
-                          {new Date(transaction.createdAt).toLocaleString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "numeric",
-                              hour12: false,
-                            }
-                          )}
-                        </span>
                       </div>
                     </div>
                   </CardBody>

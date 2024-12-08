@@ -69,6 +69,7 @@ export async function GET(
         userId: new ObjectId(verificationResult.decoded.userId),
         courseId: new ObjectId(transaction.courseId),
         transactionId: new ObjectId(transactionId),
+        progress: [],
         enrolledAt: new Date(),
       });
 

@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
 
     const result = await db.collection("quizzes").insertOne({
       instructorId: new ObjectId(verificationResult.decoded.userId),
+      title: data.title,
       questions,
       createdAt: new Date(),
       updatedAt: new Date(),
