@@ -94,10 +94,10 @@ export default function UserDashboard() {
             </Button>
           </DropdownTrigger>
           <DropdownMenu aria-label="Sort Order">
-            <DropdownItem onClick={() => setOrder("newest")}>
+            <DropdownItem key="newest" onClick={() => setOrder("newest")}>
               Newest
             </DropdownItem>
-            <DropdownItem onClick={() => setOrder("oldest")}>
+            <DropdownItem key="oldest" onClick={() => setOrder("oldest")}>
               Oldest
             </DropdownItem>
           </DropdownMenu>

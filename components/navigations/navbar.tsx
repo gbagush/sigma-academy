@@ -119,7 +119,7 @@ export const Navbar = () => {
               </DropdownTrigger>
               <DropdownMenu aria-label="User Actions" className="p-3">
                 <DropdownSection aria-label="personal" showDivider>
-                  <DropdownItem isReadOnly>
+                  <DropdownItem key="user" isReadOnly>
                     <User
                       name={wordLimit(`${user.firstName} ${user.lastName}`, 3)}
                       description={
@@ -151,7 +151,10 @@ export const Navbar = () => {
                       My Courses
                     </DropdownItem>
                   ) : (
-                    <DropdownItem className="hidden"></DropdownItem>
+                    <DropdownItem
+                      key="hidden"
+                      className="hidden"
+                    ></DropdownItem>
                   )}
 
                   {role == "user" ? (
