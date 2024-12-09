@@ -6,7 +6,7 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://sigmaacademy.my.id/">
     <img src="https://sigmaacademy.my.id/icon.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -16,7 +16,7 @@
     FullStack Online Course Platform with MongoDB database
     <br />
     <br />
-    <a href="https://simaacademy.my.id">View Demo</a>
+    <a href="https://sigmaacademy.my.id">View Demo</a>
     ·
     <a href="https://github.com/gbagush/sigma-academy/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
