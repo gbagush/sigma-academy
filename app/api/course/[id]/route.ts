@@ -18,12 +18,18 @@ export async function GET(
     const verificationResult = await verifyTokenFromRequest(request);
 
     let enrollment;
+    let certificate;
 
     if (verificationResult instanceof NextResponse) {
     } else {
       enrollment = await db.collection("enrollments").findOne({
         courseId: courseId,
         userId: new ObjectId(verificationResult.decoded.userId),
+      });
+
+      certificate = await db.collection("certificates").findOne({
+        courseId: courseId,
+        reciepentId: new ObjectId(verificationResult.decoded.userId),
       });
     }
 
@@ -121,6 +127,10 @@ export async function GET(
         ...course,
         sections: transformedSections,
       };
+    }
+
+    if (certificate) {
+      responseData = { ...responseData, certificateId: certificate._id };
     }
 
     return NextResponse.json(

@@ -57,11 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(response.data.data);
       setStatus("login");
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      setToken(null);
-      setRole(null);
-      setUser(null);
-      setStatus("logout");
+      logout();
     }
   };
 

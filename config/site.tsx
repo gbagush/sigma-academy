@@ -4,7 +4,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Sigma Academy",
-  description: "Make beautiful websites regardless of your design experience.",
+  description: "Unlock Your Potential One Course at a Time",
   navItems: [
     {
       label: "Courses",

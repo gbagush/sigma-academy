@@ -14,3 +14,9 @@ export const randomOTP = () => {
 
   return nanoid();
 };
+
+export const randomCertificateCode = () => {
+  const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 5);
+
+  return nanoid();
+};

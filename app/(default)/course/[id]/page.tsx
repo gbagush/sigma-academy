@@ -13,6 +13,7 @@ import {
   Check,
   Dot,
   Eye,
+  FileCheck,
   FileQuestion,
   Globe,
   MessageSquare,
@@ -52,6 +53,7 @@ interface CourseData {
   enrollmentId?: string;
   isInstructor?: boolean;
   isAdmin?: boolean;
+  certificateId?: string;
 }
 
 interface Section {
@@ -229,6 +231,18 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
     return <div>No course found.</div>;
   }
 
+  const allContentCompleted = () => {
+    if (!enrollment || !course) return false;
+
+    const progress = enrollment.progress || [];
+
+    return course.sections.every((section) =>
+      section.contents.every((content) =>
+        progress.some((item) => item.contentId === content._id)
+      )
+    );
+  };
+
   return (
     <section className="py-4">
       <Breadcrumbs>
@@ -283,6 +297,26 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="flex w-full justify-end gap-2  mt-12">
+          {course.certificateId && (
+            <Button
+              color="primary"
+              as={Link}
+              href={`/certificate/${course.certificateId}`}
+              target="_blank"
+            >
+              <FileCheck size={16} />
+              Show Certificate
+            </Button>
+          )}
+          {allContentCompleted() && course.certificateId === undefined && (
+            <Button
+              color="primary"
+              as={Link}
+              href={`/certificate/reedem/${enrollment?._id}`}
+            >
+              <FileCheck size={16} /> Get Certificate
+            </Button>
+          )}
           {(course.enrollmentId || course.isInstructor || course.isAdmin) && (
             <Button
               as={Link}
@@ -393,6 +427,19 @@ export default function CourseDetails({ params }: { params: { id: string } }) {
             </Accordion>
           </div>
         </div>
+        {selectedContent !== undefined && (
+          <div className="flex flex-col gap-8 justify-start items-start w-full py-4">
+            <div className="flex flex-col gap-4 max-w-2xl text-start">
+              <h4 className="text-lg md:text-2xl font-semibold">
+                {selectedContent?.title}
+              </h4>
+              <p className="text-sm text-foreground/75">
+                {selectedContent?.description}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-8 justify-start items-start w-full py-4">
           <div className="flex flex-col gap-4 max-w-2xl text-start">
             <h4 className="text-md md:text-lg font-semibold">
