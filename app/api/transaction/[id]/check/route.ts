@@ -52,7 +52,7 @@ export async function GET(
       invoiceId: transaction.invoiceId,
     });
 
-    if (transactionDetails.status != "PENDING") {
+    if (transactionDetails.status == "PAID") {
       await db.collection("transactions").updateOne(
         {
           _id: transactionId,

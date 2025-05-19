@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
-const SECRET_KEY = process.env.JWT_SECRET as string;
+const SECRET_KEY: string = process.env.JWT_SECRET || "D3f4ul7-53Cr37-k3y";
 
 export interface JWTPayload {
   userId: string;
@@ -12,10 +12,11 @@ export interface JWTPayload {
 }
 
 export function generateToken(
-  payload: object,
-  expiresIn: string = "3d"
+  payload: string | object | Buffer,
+  expiresIn: SignOptions["expiresIn"] = "3d"
 ): string {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn });
+  const options: SignOptions = { expiresIn };
+  return jwt.sign(payload, SECRET_KEY, options);
 }
 
 export function verifyToken(token: string): {

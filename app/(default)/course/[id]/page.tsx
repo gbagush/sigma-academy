@@ -700,49 +700,41 @@ const RatingSection = ({ course }: { course: CourseData }) => {
         {reviews &&
           reviews.reviews.map((review) => (
             <div className="flex flex-col" key={review._id}>
-              {reviews &&
-                reviews.reviews.map((review) => (
-                  <>
-                    <User
-                      name={`${review.userDetails.firstName} ${review.userDetails.lastName}`}
-                      description={new Date(review.updatedAt).toLocaleString(
-                        "en-US",
-                        {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        }
-                      )}
-                      avatarProps={{
-                        src: review.userDetails.profilePicture,
-                      }}
-                      className="justify-start"
-                    />
-                    <div className="flex mt-2" key={review._id}>
-                      {[1, 2, 3, 4, 5].map((value: number) => (
-                        <Button
-                          key={value}
-                          isIconOnly
-                          size="sm"
-                          variant="light"
-                        >
-                          <Star
-                            fill={value <= review.rating ? "orange" : "none"}
-                            strokeWidth={value <= review.rating ? 0 : 1}
-                          />
-                        </Button>
-                      ))}
-                    </div>
-                    <p className="text-sm text-foreground/75 mt-1">
-                      {review.review.split("\n").map((line, index) => (
-                        <React.Fragment key={index}>
-                          {line}
-                          <br />
-                        </React.Fragment>
-                      ))}
-                    </p>
-                  </>
-                ))}
+              <>
+                <User
+                  name={`${review.userDetails.firstName} ${review.userDetails.lastName}`}
+                  description={new Date(review.updatedAt).toLocaleString(
+                    "en-US",
+                    {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}
+                  avatarProps={{
+                    src: review.userDetails.profilePicture,
+                  }}
+                  className="justify-start"
+                />
+                <div className="flex mt-2" key={review._id}>
+                  {[1, 2, 3, 4, 5].map((value: number) => (
+                    <Button key={value} isIconOnly size="sm" variant="light">
+                      <Star
+                        fill={value <= review.rating ? "orange" : "none"}
+                        strokeWidth={value <= review.rating ? 0 : 1}
+                      />
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-sm text-foreground/75 mt-1">
+                  {review.review.split("\n").map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </p>
+              </>
             </div>
           ))}
 
